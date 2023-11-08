@@ -9,7 +9,6 @@ use crate::{
 use aes_gcm::aead::{Aead, NewAead};
 use aes_gcm::{Aes256Gcm, Key, Nonce, Tag};
 use base64::Engine;
-use machine_uid;
 use reqwest::{Method, StatusCode};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest as ShaDigest, Sha256};
@@ -21,7 +20,9 @@ use std::{
 use tauri::{api::os::locale, webview_version};
 use tauri::{AppHandle, Runtime};
 use types::{MachineFileRes, MachineLicense};
-use whoami;
+
+#[cfg(target_os = "linux")]
+static ENGINE_NAME: &str = "WebKit";
 
 #[cfg(target_os = "macos")]
 static ENGINE_NAME: &str = "WebKit";
