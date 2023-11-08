@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "strict": true,
+    "allowJs": false,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "types": ["@types"]
+    },
+    "declaration": true,
+    "declarationDir": "../webview-dist",
+    "rootDir": "./",
+  },
+  "include": ["./"],
+}
