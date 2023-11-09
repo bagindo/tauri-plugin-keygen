@@ -13,7 +13,7 @@ use sha2::{Digest, Sha256};
 use std::{
     fs::{create_dir_all, read_to_string, File},
     io::Write,
-    path::PathBuf,
+    path::PathBuf, time::Duration,
 };
 use tauri::{AppHandle, Runtime};
 use types::*;
@@ -92,6 +92,7 @@ impl LicensedState {
         // request validation
         let response = client
             .post(url.to_string())
+            .timeout(Duration::from_secs(90))
             .header("Content-Type", "application/vnd.api+json")
             .header("Accept", "application/vnd.api+json")
             .json(&body)

@@ -113,16 +113,13 @@ pub fn parse_err_json(status_code: StatusCode, err: serde_json::Value) -> Error 
                         let code = errs[0].code.clone().unwrap_or_default();
                         let detail = errs[0].detail.clone().unwrap_or_default();
 
-                        return Error::ApiErr {
-                            code,
-                            detail: format!("{}: {}", status_code, detail),
-                        };
+                        return Error::ApiErr { code, detail };
                     }
                 }
 
                 return Error::ApiErr {
                     code: "UNKNOWN".into(),
-                    detail: "Unknown Error".into(),
+                    detail: "Unknown Keygen API Error".into(),
                 };
             }
             Err(err) => err,

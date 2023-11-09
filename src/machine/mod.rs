@@ -16,6 +16,7 @@ use std::{
     fs::{self, File},
     io::Write,
     path::PathBuf,
+    time::Duration,
 };
 use tauri::{api::os::locale, webview_version};
 use tauri::{AppHandle, Runtime};
@@ -114,6 +115,7 @@ impl Machine {
         // request machine activation
         let response = client
             .post(url.to_string())
+            .timeout(Duration::from_secs(90))
             .header("Content-Type", "application/vnd.api+json")
             .header("Accept", "application/vnd.api+json")
             .header("Authorization", format!("License {}", license.key))
@@ -185,6 +187,7 @@ impl Machine {
         // request machine checkout
         let response = client
             .post(url.to_string())
+            .timeout(Duration::from_secs(90))
             .header("Accept", "application/vnd.api+json")
             .header("Authorization", format!("License {}", license.key))
             .send()
