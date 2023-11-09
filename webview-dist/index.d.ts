@@ -10,7 +10,7 @@ export declare type KeygenError = {
     code: string;
     detail: string;
 };
-export declare function isLicensed(): Promise<boolean>;
+export declare function hasValidLicense(): Promise<boolean>;
 export declare function getLicense(): Promise<KeygenLicense | null>;
 export declare function getLicenseKey(): Promise<string | null>;
 export declare function canUpdate(): Promise<boolean>;
