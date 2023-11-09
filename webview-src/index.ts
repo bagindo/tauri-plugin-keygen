@@ -14,8 +14,8 @@ export type KeygenError = {
   detail: string;
 };
 
-export async function isLicensed(): Promise<boolean> {
-  return (await invoke("plugin:keygen|is_licensed")) as boolean;
+export async function hasValidLicense(): Promise<boolean> {
+  return (await invoke("plugin:keygen|has_valid_license")) as boolean;
 }
 
 export async function getLicense(): Promise<KeygenLicense | null> {
