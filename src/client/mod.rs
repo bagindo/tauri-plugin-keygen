@@ -82,7 +82,7 @@ impl KeygenClient {
                 query.push(format!("{}={}", param.0, param.1));
             }
 
-            if query.len() > 0 {
+            if !query.is_empty() {
                 url.set_query(Some(&query.join("&")));
             }
         }
@@ -147,7 +147,7 @@ impl KeygenClient {
             }),
             Err(err) => {
                 dbg!(err);
-                return Err(Error::BadResponse("Invalid Signature".into()));
+                Err(Error::BadResponse("Invalid Signature".into()))
             }
         }
     }
@@ -182,7 +182,7 @@ impl KeygenClient {
             }
             Err(err) => {
                 dbg!(err);
-                return Err(Error::BadCache("Invalid Signature".into()));
+                Err(Error::BadCache("Invalid Signature".into()))
             }
         }
     }
@@ -212,7 +212,7 @@ impl KeygenClient {
         // verify
         match key.verify(data.as_bytes(), &sig.into()) {
             Ok(_) => Ok(()),
-            Err(_) => return Err(Error::ParseErr("Invalid signature".into())),
+            Err(_) => Err(Error::ParseErr("Invalid signature".into())),
         }
     }
 }

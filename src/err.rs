@@ -33,50 +33,36 @@ pub struct ErrorSummary {
 impl From<Error> for ErrorSummary {
     fn from(value: Error) -> Self {
         match value {
-            Error::HttpError(detail) => {
-                return Self {
-                    code: "HTTP_ERROR".into(),
-                    detail,
-                };
-            }
-            Error::RequestError(_) => {
-                return Self {
-                    code: "REQUEST_ERROR".into(),
-                    detail: "Failed sending request: Check your internet".into(),
-                };
-            }
-            Error::BadResponse(detail) => {
-                return Self {
-                    code: "BAD_RESPONSE".into(),
-                    detail,
-                };
-            }
-            Error::BadCache(detail) => {
-                return Self {
-                    code: "BAD_CACHE".into(),
-                    detail,
-                };
-            }
-            Error::LicenseErr { code, detail } => {
-                return Self { code, detail };
-            }
-            Error::ApiErr { code, detail } => {
-                return Self { code, detail };
-            }
+            Error::HttpError(detail) => Self {
+                code: "HTTP_ERROR".into(),
+                detail,
+            },
+            Error::RequestError(_) => Self {
+                code: "REQUEST_ERROR".into(),
+                detail: "Failed sending request: Check your internet".into(),
+            },
+            Error::BadResponse(detail) => Self {
+                code: "BAD_RESPONSE".into(),
+                detail,
+            },
+            Error::BadCache(detail) => Self {
+                code: "BAD_CACHE".into(),
+                detail,
+            },
+            Error::LicenseErr { code, detail } => Self { code, detail },
+            Error::ApiErr { code, detail } => Self { code, detail },
             err => {
-                let msg: String;
-
-                match err {
-                    Error::Io(err) => msg = err.to_string(),
-                    Error::PathErr(err) => msg = err,
-                    Error::ParseErr(err) => msg = err,
-                    _ => msg = "".into(),
-                }
-
-                return Self {
-                    code: "ERR".into(),
-                    detail: format!("{}", msg),
+                let msg = match err {
+                    Error::Io(err) => err.to_string(),
+                    Error::PathErr(err) => err,
+                    Error::ParseErr(err) => err,
+                    _ => "".into(),
                 };
+
+                Self {
+                    code: "ERR".into(),
+                    detail: msg,
+                }
             }
         }
     }
@@ -108,7 +94,7 @@ pub fn parse_err_json(status_code: StatusCode, err: serde_json::Value) -> Error 
         match api_errors {
             Ok(api_errs) => {
                 if let Some(errs) = api_errs.errors {
-                    if errs.len() > 0 {
+                    if !errs.is_empty() {
                         // just return the first item on the errors array
                         let code = errs[0].code.clone().unwrap_or_default();
                         let detail = errs[0].detail.clone().unwrap_or_default();
@@ -117,10 +103,10 @@ pub fn parse_err_json(status_code: StatusCode, err: serde_json::Value) -> Error 
                     }
                 }
 
-                return Error::ApiErr {
+                Error::ApiErr {
                     code: "UNKNOWN".into(),
                     detail: "Unknown Keygen API Error".into(),
-                };
+                }
             }
             Err(err) => err,
         }

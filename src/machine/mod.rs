@@ -51,11 +51,11 @@ impl Machine {
     pub fn new(app_name: String, app_version: String) -> Self {
         let id = machine_uid::get().unwrap_or("".into());
         let name = format!("{} - {}", whoami::realname(), whoami::devicename());
-        let hostname = format!("{}", whoami::hostname());
+        let hostname = whoami::hostname().to_string();
 
         // platform
         let os_name = format!("{}", whoami::platform());
-        let os_version = format!("{}", whoami::distro());
+        let os_version = whoami::distro().to_string();
         let arch = format!("{}", whoami::arch());
         let platform = format!("{} - {} - {}", os_name, os_version, arch);
 
@@ -138,10 +138,10 @@ impl Machine {
                         detail: "is valid".into(),
                         ..license
                     }),
-                    Err(err) => return Err(err),
+                    Err(err) => Err(err),
                 }
             }
-            status_code => return Err(parse_err_json(status_code, res_json)),
+            status_code => Err(parse_err_json(status_code, res_json)),
         }
     }
 
@@ -222,12 +222,10 @@ impl Machine {
 
                         Ok(())
                     }
-                    Err(err) => return Err(err),
+                    Err(err) => Err(err),
                 }
             }
-            code => {
-                return Err(parse_err_json(code, res_json));
-            }
+            code => Err(parse_err_json(code, res_json)),
         }
     }
 
@@ -299,7 +297,7 @@ impl Machine {
         let data: Vec<_> = lic
             .enc
             .trim()
-            .split(".")
+            .split('.')
             .map(|v| {
                 base64::engine::general_purpose::STANDARD
                     .decode(v)
@@ -338,7 +336,7 @@ impl Machine {
     fn save_machine_file<R: Runtime>(&self, cert: String, app: &AppHandle<R>) -> Result<()> {
         let path = self.machine_file_path(app)?;
 
-        let mut f = File::create(&path)?;
+        let mut f = File::create(path)?;
         f.write_all(cert.as_bytes())?;
 
         Ok(())

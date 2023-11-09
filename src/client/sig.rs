@@ -124,7 +124,7 @@ impl KeygenSig {
         let signature_params = parameterized_header.split(", ");
 
         for param in signature_params {
-            let mut parts = param.splitn(3, "\"");
+            let mut parts = param.splitn(3, '\"');
 
             if let Some(key) = parts.next() {
                 if let Some(val) = parts.next() {

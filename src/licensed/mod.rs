@@ -13,7 +13,8 @@ use sha2::{Digest, Sha256};
 use std::{
     fs::{create_dir_all, read_to_string, File},
     io::Write,
-    path::PathBuf, time::Duration,
+    path::PathBuf,
+    time::Duration,
 };
 use tauri::{AppHandle, Runtime};
 use types::*;
@@ -133,17 +134,17 @@ impl LicensedState {
 
                         Ok((license, res_cache))
                     }
-                    Err(err) => return Err(err),
+                    Err(err) => Err(err),
                 }
             }
-            status_code => return Err(parse_err_json(status_code, res_json)),
+            status_code => Err(parse_err_json(status_code, res_json)),
         }
     }
 
     fn cache_license_key<R: Runtime>(key: String, app: &AppHandle<R>) -> Result<()> {
         let path = Self::license_key_cache_path(app)?;
 
-        let mut f = File::create(&path)?;
+        let mut f = File::create(path)?;
         f.write_all(key.as_bytes())?;
 
         Ok(())
@@ -194,7 +195,7 @@ impl LicensedState {
         let cache_text = serde_json::to_string(&cache)
             .map_err(|_| Error::ParseErr("Failed parsing response cache to text".into()))?;
 
-        let mut f = File::create(&path)?;
+        let mut f = File::create(path)?;
         f.write_all(cache_text.as_bytes())?;
 
         Ok(())
@@ -269,7 +270,7 @@ impl License {
             Some(lic_data) => {
                 let lic_policy = lic_data.relationships.policy;
 
-                return Some(Self {
+                Some(Self {
                     id: lic_data.id,
                     policy_id: lic_policy.data.id,
                     key: lic_data.attributes.key,
@@ -278,15 +279,15 @@ impl License {
                     expiry: lic_data.attributes.expiry,
                     last_validated: lic_data.attributes.last_validated,
                     valid: lic_res.meta.valid,
-                });
+                })
             }
-            None => return None,
+            None => None,
         }
     }
 
     pub fn from_machine_license(machine_license: MachineLicense) -> Result<Option<Self>> {
         // has license details
-        if machine_license.included.len() < 1 {
+        if machine_license.included.is_empty() {
             return Ok(None);
         }
 

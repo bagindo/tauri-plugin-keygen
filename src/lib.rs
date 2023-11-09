@@ -64,7 +64,7 @@ impl Builder {
                 );
 
                 // init state
-                match LicensedState::load(&app, &keygen_client, &machine) {
+                match LicensedState::load(app, &keygen_client, &machine) {
                     Ok(licensed_state) => {
                         app.manage(Mutex::new(licensed_state));
                     }

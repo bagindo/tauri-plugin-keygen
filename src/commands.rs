@@ -40,7 +40,7 @@ pub async fn get_license_key<R: Runtime>(
         Ok(key) => Ok(key),
         Err(err) => {
             dbg!(&err);
-            return Err(err.into());
+            Err(err.into())
         }
     }
 }
@@ -55,13 +55,13 @@ pub async fn can_update<R: Runtime>(
 
     match licensed_state.get_license() {
         Some(license) => match license.has_not_expired() {
-            Ok(not_expired) => return Ok(not_expired),
+            Ok(not_expired) => Ok(not_expired),
             Err(err) => {
                 dbg!(&err);
-                return Ok(false);
+                Ok(false)
             }
         },
-        None => return Ok(false),
+        None => Ok(false),
     }
 }
 
@@ -120,7 +120,7 @@ pub async fn activate<R: Runtime>(
         }
         Err(err) => {
             dbg!(&err);
-            return Err(err.into());
+            Err(err.into())
         }
     }
 }
@@ -143,7 +143,7 @@ pub async fn checkout_machine<R: Runtime>(
         Ok(()) => Ok(()),
         Err(err) => {
             dbg!(&err);
-            return Err(err.into());
+            Err(err.into())
         }
     }
 }
