@@ -3,7 +3,7 @@ pub mod types;
 use crate::{
     client::KeygenClient,
     err::{parse_err_json, Error},
-    licensed::{License, LicensedState},
+    licensed::{license::License, LicensedState},
     Result,
 };
 use aes_gcm::aead::{Aead, NewAead};

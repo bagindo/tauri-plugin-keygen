@@ -1,7 +1,7 @@
 use crate::{
     client::KeygenClient,
     err::ErrorSummary,
-    licensed::{License, LicensedState},
+    licensed::{license::License, LicensedState},
     machine::Machine,
 };
 use tauri::{command, AppHandle, Runtime, State, Window};
