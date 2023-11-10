@@ -259,8 +259,6 @@ pub struct License {
     pub code: String,
     pub detail: String,
     pub expiry: Option<String>,
-    #[serde(skip_serializing)]
-    pub last_validated: String,
     pub valid: bool,
 }
 
@@ -277,7 +275,6 @@ impl License {
                     code: lic_res.meta.code,
                     detail: lic_res.meta.detail,
                     expiry: lic_data.attributes.expiry,
-                    last_validated: lic_data.attributes.last_validated,
                     valid: lic_res.meta.valid,
                 })
             }
@@ -308,7 +305,6 @@ impl License {
             code: "VALID".into(),
             detail: "is valid".into(),
             expiry: Some(included_lic.attributes.expiry),
-            last_validated: included_lic.attributes.last_validated,
             valid: true,
         }))
     }
@@ -328,32 +324,6 @@ impl License {
         let valid = minutes_since_issued > 0 && minutes_to_expiry > 0;
 
         Ok(valid)
-    }
-
-    // flag for checking update
-    pub fn has_not_expired(&self) -> Result<bool> {
-        // license with Null expiry is considered as expired
-        if self.expiry.is_none() {
-            return Ok(false);
-        }
-
-        let expiry = self.expiry.clone().unwrap();
-        let last_validated = self.last_validated.clone();
-
-        let now = Local::now();
-        let issued = DateTime::parse_from_rfc3339(&last_validated)
-            .map_err(|_| Error::ParseErr("Failed parsing license lastValidated date".into()))?;
-        let expiry = DateTime::parse_from_rfc3339(&expiry)
-            .map_err(|_| Error::ParseErr("Failed parsing license expiry date".into()))?;
-
-        // clock tampering flag
-        let minutes_since_issued = now.signed_duration_since(issued).num_minutes();
-        // expiration flag
-        let minutes_to_expiry = expiry.signed_duration_since(now).num_minutes();
-
-        let not_expired = minutes_since_issued > 0 && minutes_to_expiry > 0;
-
-        Ok(not_expired)
     }
 
     pub fn should_maintain_access(&self) -> bool {

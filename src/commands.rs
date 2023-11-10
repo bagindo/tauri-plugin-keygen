@@ -46,26 +46,6 @@ pub async fn get_license_key<R: Runtime>(
 }
 
 #[command]
-pub async fn can_update<R: Runtime>(
-    _app: AppHandle<R>,
-    _window: Window<R>,
-    licensed_state: State<'_, Mutex<LicensedState>>,
-) -> Result<bool> {
-    let licensed_state = licensed_state.lock().await;
-
-    match licensed_state.get_license() {
-        Some(license) => match license.has_not_expired() {
-            Ok(not_expired) => Ok(not_expired),
-            Err(err) => {
-                dbg!(&err);
-                Ok(false)
-            }
-        },
-        None => Ok(false),
-    }
-}
-
-#[command]
 pub async fn validate<R: Runtime>(
     app: AppHandle<R>,
     _window: Window<R>,

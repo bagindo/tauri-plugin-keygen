@@ -45,7 +45,6 @@ impl Builder {
                 commands::validate,
                 commands::activate,
                 commands::checkout_machine,
-                commands::can_update,
             ])
             .setup(|app| {
                 // get app info

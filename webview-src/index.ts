@@ -4,7 +4,7 @@ export type KeygenLicense = {
   key: string;
   code: string;
   detail: string;
-  expiry: string;
+  expiry: string | null;
   valid: string;
   policyId: string;
 };
@@ -24,10 +24,6 @@ export async function getLicense(): Promise<KeygenLicense | null> {
 
 export async function getLicenseKey(): Promise<string | null> {
   return (await invoke("plugin:keygen|get_license_key")) as string | null;
-}
-
-export async function canUpdate(): Promise<boolean> {
-  return (await invoke("plugin:keygen|can_update")) as boolean;
 }
 
 export async function validateLicense({

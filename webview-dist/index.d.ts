@@ -2,7 +2,7 @@ export declare type KeygenLicense = {
     key: string;
     code: string;
     detail: string;
-    expiry: string;
+    expiry: string | null;
     valid: string;
     policyId: string;
 };
@@ -13,7 +13,6 @@ export declare type KeygenError = {
 export declare function hasValidLicense(): Promise<boolean>;
 export declare function getLicense(): Promise<KeygenLicense | null>;
 export declare function getLicenseKey(): Promise<string | null>;
-export declare function canUpdate(): Promise<boolean>;
 export declare function validateLicense({ key, cacheResponse, }: {
     key: string;
     cacheResponse?: boolean;

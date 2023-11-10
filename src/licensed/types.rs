@@ -27,7 +27,6 @@ pub struct LicenseAttributes {
     pub name: Option<String>,
     pub key: String,
     pub expiry: Option<String>,
-    pub last_validated: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
