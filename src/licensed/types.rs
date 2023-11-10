@@ -26,7 +26,7 @@ pub struct LicenseData {
 pub struct LicenseAttributes {
     pub name: Option<String>,
     pub key: String,
-    pub expiry: String,
+    pub expiry: Option<String>,
     pub last_validated: String,
 }
 

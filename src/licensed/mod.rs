@@ -258,7 +258,7 @@ pub struct License {
     pub key: String,
     pub code: String,
     pub detail: String,
-    pub expiry: String,
+    pub expiry: Option<String>,
     #[serde(skip_serializing)]
     pub last_validated: String,
     pub valid: bool,
@@ -307,7 +307,7 @@ impl License {
             key: included_lic.attributes.key,
             code: "VALID".into(),
             detail: "is valid".into(),
-            expiry: included_lic.attributes.expiry,
+            expiry: Some(included_lic.attributes.expiry),
             last_validated: included_lic.attributes.last_validated,
             valid: true,
         }))
@@ -332,10 +332,18 @@ impl License {
 
     // flag for checking update
     pub fn has_not_expired(&self) -> Result<bool> {
+        // license with Null expiry is considered as expired
+        if self.expiry.is_none() {
+            return Ok(false);
+        }
+
+        let expiry = self.expiry.clone().unwrap();
+        let last_validated = self.last_validated.clone();
+
         let now = Local::now();
-        let issued = DateTime::parse_from_rfc3339(&self.last_validated)
+        let issued = DateTime::parse_from_rfc3339(&last_validated)
             .map_err(|_| Error::ParseErr("Failed parsing license lastValidated date".into()))?;
-        let expiry = DateTime::parse_from_rfc3339(&self.expiry)
+        let expiry = DateTime::parse_from_rfc3339(&expiry)
             .map_err(|_| Error::ParseErr("Failed parsing license expiry date".into()))?;
 
         // clock tampering flag

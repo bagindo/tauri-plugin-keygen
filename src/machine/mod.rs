@@ -169,6 +169,14 @@ impl Machine {
             });
         }
 
+        // expiry can't be null
+        if license.expiry.is_none() {
+            return Err(Error::LicenseErr {
+                code: "NOT_ACTIVATED".into(),
+                detail: "Can't checkout machine file. License hasn't been fully activated. Expiry still Null".into(),
+            });
+        }
+
         // build url
         let mut params = vec![("encrypt", "1"), ("include", "license")];
 

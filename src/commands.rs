@@ -86,17 +86,17 @@ pub async fn validate<R: Runtime>(
             licensed_state.update(license.clone(), &app)?;
 
             // cache response
-            if license.valid && cache_response {
-                LicensedState::cache_response(&app, license.key.clone(), res_cache)?
+            if license.valid && cache_response && license.expiry.is_some() {
+                LicensedState::cache_response(&app, license.key.clone(), res_cache)?;
             }
 
-            return Ok(license);
+            Ok(license)
         }
         Err(err) => {
             dbg!(&err);
-            return Err(err.into());
+            Err(err.into())
         }
-    };
+    }
 }
 
 #[command]
