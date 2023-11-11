@@ -10,11 +10,11 @@ export declare type KeygenError = {
     code: string;
     detail: string;
 };
-export declare function hasValidLicense(): Promise<boolean>;
 export declare function getLicense(): Promise<KeygenLicense | null>;
 export declare function getLicenseKey(): Promise<string | null>;
-export declare function validateLicense({ key, cacheResponse, }: {
+export declare function validateLicense({ key, shouldActivate, cacheResponse, }: {
     key: string;
+    shouldActivate?: boolean;
     cacheResponse?: boolean;
 }): Promise<KeygenLicense>;
 export declare function activateMachine(): Promise<KeygenLicense>;

@@ -39,7 +39,6 @@ impl Builder {
     pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
         PluginBuilder::new("keygen")
             .invoke_handler(tauri::generate_handler![
-                commands::has_valid_license,
                 commands::get_license,
                 commands::get_license_key,
                 commands::validate,

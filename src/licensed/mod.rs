@@ -64,13 +64,6 @@ impl LicensedState {
         Ok(())
     }
 
-    pub fn has_valid_license(&self) -> bool {
-        match self.license.clone() {
-            Some(license) => license.valid,
-            None => false,
-        }
-    }
-
     pub fn get_license(&self) -> Option<License> {
         self.license.clone()
     }

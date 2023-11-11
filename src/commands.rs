@@ -10,17 +10,6 @@ use tokio::sync::Mutex;
 type Result<T> = std::result::Result<T, ErrorSummary>;
 
 #[command]
-pub async fn has_valid_license<R: Runtime>(
-    _app: AppHandle<R>,
-    _window: Window<R>,
-    licensed_state: State<'_, Mutex<LicensedState>>,
-) -> Result<bool> {
-    let licensed_state = licensed_state.lock().await;
-
-    Ok(licensed_state.has_valid_license())
-}
-
-#[command]
 pub async fn get_license<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,

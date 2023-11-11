@@ -14,10 +14,6 @@ export type KeygenError = {
   detail: string;
 };
 
-export async function hasValidLicense(): Promise<boolean> {
-  return (await invoke("plugin:keygen|has_valid_license")) as boolean;
-}
-
 export async function getLicense(): Promise<KeygenLicense | null> {
   return (await invoke("plugin:keygen|get_license")) as KeygenLicense | null;
 }
@@ -28,9 +24,11 @@ export async function getLicenseKey(): Promise<string | null> {
 
 export async function validateLicense({
   key,
-  cacheResponse = false,
+  shouldActivate = true,
+  cacheResponse = true,
 }: {
   key: string;
+  shouldActivate?: boolean;
   cacheResponse?: boolean;
 }): Promise<KeygenLicense> {
   const license = (await invoke("plugin:keygen|validate", {
@@ -38,7 +36,7 @@ export async function validateLicense({
     cacheResponse,
   })) as KeygenLicense;
 
-  if (licenseNotActivated(license)) {
+  if (shouldActivate && licenseNotActivated(license)) {
     return await activateMachine();
   }
 
@@ -50,15 +48,11 @@ export async function activateMachine(): Promise<KeygenLicense> {
 }
 
 export function licenseNotActivated(license: KeygenLicense): boolean {
-  if (
+  return (
     license.code === "NO_MACHINE" ||
     license.code === "NO_MACHINES" ||
     license.code === "FINGERPRINT_SCOPE_MISMATCH"
-  ) {
-    return true;
-  }
-
-  return false;
+  );
 }
 
 export async function checkoutMachine(): Promise<void> {
