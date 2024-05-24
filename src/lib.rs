@@ -41,7 +41,7 @@ impl Builder {
             .invoke_handler(tauri::generate_handler![
                 commands::get_license,
                 commands::get_license_key,
-                commands::validate,
+                commands::validate_key,
                 commands::activate,
                 commands::checkout_machine,
             ])

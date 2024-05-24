@@ -68,7 +68,7 @@ impl LicensedState {
         self.license.clone()
     }
 
-    pub async fn validate(
+    pub async fn validate_key(
         &mut self,
         key: String,
         machine: &Machine,
