@@ -51,7 +51,7 @@ impl Machine {
     pub fn new(app_name: String, app_version: String) -> Self {
         let id = machine_uid::get().unwrap_or("".into());
         let name = format!("{} - {}", whoami::realname(), whoami::devicename());
-        let hostname = whoami::hostname().to_string();
+        let hostname = whoami::fallible::hostname().unwrap_or("".into());
 
         // platform
         let os_name = format!("{}", whoami::platform());
