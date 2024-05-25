@@ -8,8 +8,10 @@ pub enum Error {
     #[error("Path Error: {0}")]
     PathErr(String),
     #[error("Http error: {0}")]
+    #[allow(clippy::enum_variant_names)]
     HttpError(String),
     #[error("Failed processing a request: {0}")]
+    #[allow(clippy::enum_variant_names)]
     RequestError(#[from] reqwest::Error),
     #[error("Bad response: {0}")]
     BadResponse(String),
