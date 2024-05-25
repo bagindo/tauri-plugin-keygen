@@ -34,8 +34,8 @@ impl LicensedState {
     ) -> Result<Self> {
         if let Some(key) = Self::get_cached_license_key(app)? {
             // load from response cache
-            if let Some(res_cache) = Self::get_response_cache(app, key.clone())? {
-                let lic_res = client.verify_response_cache(res_cache)?;
+            if let Some((res_cache, cache_path)) = Self::get_response_cache(app, key.clone())? {
+                let lic_res = client.verify_response_cache(res_cache, cache_path)?;
                 let license = License::from_license_response(lic_res);
                 return Ok(Self { license });
             }
@@ -199,7 +199,7 @@ impl LicensedState {
     fn get_response_cache<R: Runtime>(
         app: &AppHandle<R>,
         license_key: String,
-    ) -> Result<Option<KeygenResponseCache>> {
+    ) -> Result<Option<(KeygenResponseCache, PathBuf)>> {
         // cache path
         let path = Self::response_cache_path(app, license_key)?;
 
@@ -209,13 +209,13 @@ impl LicensedState {
         }
 
         // cache content
-        let cache_text = read_to_string(path)?;
+        let cache_text = read_to_string(&path)?;
         let cache_json: serde_json::Value = serde_json::from_str(&cache_text)
             .map_err(|_| Error::ParseErr("Failed parsing response cache to json".into()))?;
         let cache: KeygenResponseCache = serde_json::from_value(cache_json)
             .map_err(|_| Error::ParseErr("Failed deserializing response cache".into()))?;
 
-        Ok(Some(cache))
+        Ok(Some((cache, path)))
     }
 
     fn response_cache_path<R: Runtime>(app: &AppHandle<R>, license_key: String) -> Result<PathBuf> {

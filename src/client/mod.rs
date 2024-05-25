@@ -8,6 +8,8 @@ use hex::FromHex;
 use reqwest::{header::HeaderMap, Method, RequestBuilder, Response, Url};
 use serde::{Deserialize, Serialize};
 use sig::KeygenSig;
+use std::fs;
+use std::path::PathBuf;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -152,7 +154,11 @@ impl KeygenClient {
         }
     }
 
-    pub fn verify_response_cache(&self, res_cache: KeygenResponseCache) -> Result<LicenseResponse> {
+    pub fn verify_response_cache(
+        &self,
+        res_cache: KeygenResponseCache,
+        cache_path: PathBuf,
+    ) -> Result<LicenseResponse> {
         let res_text = res_cache.body.clone();
         let sig = KeygenSig::from_response_cache(res_cache);
 
@@ -164,6 +170,7 @@ impl KeygenClient {
 
         // check request date
         if minutes_since_response > self.cache_lifetime {
+            fs::remove_file(cache_path)?;
             return Err(Error::BadCache("Validation cache has expired".into()));
         }
 
@@ -182,6 +189,7 @@ impl KeygenClient {
             }
             Err(err) => {
                 dbg!(err);
+                fs::remove_file(cache_path)?;
                 Err(Error::BadCache("Invalid Signature".into()))
             }
         }
