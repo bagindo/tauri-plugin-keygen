@@ -70,23 +70,18 @@ pub async fn validate_key<R: Runtime>(
 
 #[command]
 pub async fn activate<R: Runtime>(
-    app: AppHandle<R>,
     _window: Window<R>,
     machine: State<'_, Mutex<Machine>>,
     client: State<'_, Mutex<KeygenClient>>,
     licensed_state: State<'_, Mutex<LicensedState>>,
-) -> Result<License> {
+) -> Result<()> {
     let machine = machine.lock().await;
     let client = client.lock().await;
 
     let mut licensed_state = licensed_state.lock().await;
 
     match machine.activate(&mut licensed_state, &client).await {
-        Ok(license) => {
-            licensed_state.update(license.clone(), &app)?;
-
-            Ok(license)
-        }
+        Ok(()) => Ok(()),
         Err(err) => {
             dbg!(&err);
             Err(err.into())

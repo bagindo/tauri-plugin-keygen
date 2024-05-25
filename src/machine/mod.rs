@@ -3,7 +3,7 @@ pub mod types;
 use crate::{
     client::KeygenClient,
     err::{parse_err_json, Error},
-    licensed::{license::License, LicensedState},
+    licensed::LicensedState,
     Result,
 };
 use aes_gcm::aead::{Aead, NewAead};
@@ -81,7 +81,7 @@ impl Machine {
         &self,
         licensed_state: &mut LicensedState,
         client: &KeygenClient,
-    ) -> Result<License> {
+    ) -> Result<()> {
         // get license
         let license = licensed_state
             .get_license()
@@ -132,12 +132,7 @@ impl Machine {
             StatusCode::CREATED => {
                 // verify signature
                 match client.verify_response(Method::POST.to_string(), url, res_headers, res_text) {
-                    Ok(_) => Ok(License {
-                        valid: true,
-                        code: "VALID".into(),
-                        detail: "is valid".into(),
-                        ..license
-                    }),
+                    Ok(_) => Ok(()),
                     Err(err) => Err(err),
                 }
             }
