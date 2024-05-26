@@ -5,7 +5,7 @@ export type KeygenLicense = {
   code: string;
   detail: string;
   expiry: string | null;
-  valid: string;
+  valid: boolean;
   policyId: string;
 };
 
