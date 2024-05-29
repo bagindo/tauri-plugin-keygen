@@ -33,16 +33,16 @@ impl LicensedState {
         machine: &Machine,
     ) -> Result<Self> {
         if let Some(key) = Self::get_cached_license_key(app)? {
-            // load from response cache
-            if let Some((res_cache, cache_path)) = Self::get_response_cache(app, key.clone())? {
-                let lic_res = client.verify_response_cache(res_cache, cache_path)?;
-                let license = License::from_license_response(lic_res);
+            // load from machine file
+            if let Some(machine_license) = machine.load_machine_file(key.clone(), client, app)? {
+                let license = License::from_machine_license(machine_license)?;
                 return Ok(Self { license });
             }
 
-            // load from machine file
-            if let Some(machine_license) = machine.load_machine_file(key, client, app)? {
-                let license = License::from_machine_license(machine_license)?;
+            // load from response cache
+            if let Some((res_cache, cache_path)) = Self::get_response_cache(app, key)? {
+                let lic_res = client.verify_response_cache(res_cache, cache_path)?;
+                let license = License::from_license_response(lic_res);
                 return Ok(Self { license });
             }
         }
