@@ -18,4 +18,6 @@ export declare function validateKey({ key, shouldActivate, cacheValidResponse, }
     cacheValidResponse?: boolean;
 }): Promise<KeygenLicense>;
 export declare function activateMachine(): Promise<KeygenLicense>;
-export declare function checkoutMachine(): Promise<void>;
+export declare function checkoutMachine({ ttlSeconds, }: {
+    ttlSeconds?: number;
+}): Promise<void>;

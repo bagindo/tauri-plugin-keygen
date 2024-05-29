@@ -58,6 +58,16 @@ export async function activateMachine(): Promise<KeygenLicense> {
   return (await invoke("plugin:keygen|activate")) as KeygenLicense;
 }
 
-export async function checkoutMachine(): Promise<void> {
-  await invoke("plugin:keygen|checkout_machine");
+export async function checkoutMachine({
+  ttlSeconds = 3600,
+}: {
+  ttlSeconds?: number;
+}): Promise<void> {
+  const min = 3600; // 1 hour
+  const max = 31556952; // 1 year
+  const ttl = ttlSeconds >= min && ttlSeconds <= max ? ttlSeconds : 3600;
+
+  await invoke("plugin:keygen|checkout_machine", {
+    ttl,
+  });
 }
