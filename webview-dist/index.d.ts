@@ -16,7 +16,11 @@ export declare function validateKey({ key, cacheValidResponse, }: {
     key: string;
     cacheValidResponse?: boolean;
 }): Promise<KeygenLicense>;
+export declare function validateCheckoutKey({ key, ttlSeconds, }: {
+    key: string;
+    ttlSeconds: number;
+}): Promise<KeygenLicense>;
 export declare function activateMachine(): Promise<KeygenLicense>;
 export declare function checkoutMachine({ ttlSeconds, }: {
-    ttlSeconds?: number;
+    ttlSeconds: number;
 }): Promise<void>;

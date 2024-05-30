@@ -52,14 +52,31 @@ export async function validateKey({
   return license;
 }
 
+export async function validateCheckoutKey({
+  key,
+  ttlSeconds,
+}: {
+  key: string;
+  ttlSeconds: number;
+}) {
+  const license = (await validateKey({
+    key,
+    cacheValidResponse: false,
+  })) as KeygenLicense;
+
+  await checkoutMachine({ ttlSeconds });
+
+  return license;
+}
+
 export async function activateMachine(): Promise<KeygenLicense> {
   return (await invoke("plugin:keygen|activate")) as KeygenLicense;
 }
 
 export async function checkoutMachine({
-  ttlSeconds = 3600,
+  ttlSeconds,
 }: {
-  ttlSeconds?: number;
+  ttlSeconds: number;
 }): Promise<void> {
   const min = 3600; // 1 hour
   const max = 31556952; // 1 year
