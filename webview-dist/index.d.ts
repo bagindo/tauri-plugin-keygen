@@ -12,9 +12,8 @@ export declare type KeygenError = {
 };
 export declare function getLicense(): Promise<KeygenLicense | null>;
 export declare function getLicenseKey(): Promise<string | null>;
-export declare function validateKey({ key, shouldActivate, cacheValidResponse, }: {
+export declare function validateKey({ key, cacheValidResponse, }: {
     key: string;
-    shouldActivate?: boolean;
     cacheValidResponse?: boolean;
 }): Promise<KeygenLicense>;
 export declare function activateMachine(): Promise<KeygenLicense>;

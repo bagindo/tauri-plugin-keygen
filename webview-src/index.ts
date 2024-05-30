@@ -24,11 +24,9 @@ export async function getLicenseKey(): Promise<string | null> {
 
 export async function validateKey({
   key,
-  shouldActivate = true,
   cacheValidResponse = true,
 }: {
   key: string;
-  shouldActivate?: boolean;
   cacheValidResponse?: boolean;
 }): Promise<KeygenLicense> {
   let license = (await invoke("plugin:keygen|validate_key", {
@@ -41,7 +39,7 @@ export async function validateKey({
     license.code === "NO_MACHINES" ||
     license.code === "FINGERPRINT_SCOPE_MISMATCH";
 
-  if (noMachine && shouldActivate) {
+  if (noMachine) {
     await activateMachine();
 
     // re-validate
