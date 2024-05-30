@@ -64,7 +64,9 @@ export async function validateCheckoutKey({
     cacheValidResponse: false,
   })) as KeygenLicense;
 
-  await checkoutMachine({ ttlSeconds });
+  if (license.valid) {
+    await checkoutMachine({ ttlSeconds });
+  }
 
   return license;
 }
