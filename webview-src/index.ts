@@ -24,13 +24,16 @@ export async function getLicenseKey(): Promise<string | null> {
 
 export async function validateKey({
   key,
+  entitlements = [],
   cacheValidResponse = true,
 }: {
   key: string;
+  entitlements?: string[];
   cacheValidResponse?: boolean;
 }): Promise<KeygenLicense> {
   let license = (await invoke("plugin:keygen|validate_key", {
     key,
+    entitlements,
     cacheValidResponse,
   })) as KeygenLicense;
 
@@ -42,9 +45,11 @@ export async function validateKey({
   if (noMachine) {
     await activateMachine();
 
-    // re-validate
+    // re-validate: update License object in Tauri App State
+    // activateMachine() response is not "parsable" to KeygenLicense type
     license = (await invoke("plugin:keygen|validate_key", {
       key,
+      entitlements,
       cacheValidResponse,
     })) as KeygenLicense;
   }
@@ -55,12 +60,15 @@ export async function validateKey({
 export async function validateCheckoutKey({
   key,
   ttlSeconds,
+  entitlements = [],
 }: {
   key: string;
   ttlSeconds: number;
+  entitlements?: string[];
 }) {
   const license = (await validateKey({
     key,
+    entitlements,
     cacheValidResponse: false,
   })) as KeygenLicense;
 
