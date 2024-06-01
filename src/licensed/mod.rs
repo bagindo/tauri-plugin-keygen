@@ -34,9 +34,17 @@ impl LicensedState {
     ) -> Result<Self> {
         if let Some(key) = Self::get_cached_license_key(app)? {
             // load from machine file
-            if let Some(machine_license) = machine.load_machine_file(key.clone(), client, app)? {
-                let license = License::from_machine_license(machine_license)?;
-                return Ok(Self { license });
+            match machine.load_machine_file(key.clone(), client, app) {
+                Ok(Some(machine_license)) => match License::from_machine_license(machine_license) {
+                    Ok(license) => return Ok(Self { license }),
+                    Err(e) => {
+                        dbg!(e);
+                    }
+                },
+                Ok(None) => {}
+                Err(e) => {
+                    dbg!(e);
+                }
             }
 
             // load from response cache
