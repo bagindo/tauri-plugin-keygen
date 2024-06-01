@@ -5,6 +5,8 @@ export declare type KeygenLicense = {
     expiry: string | null;
     valid: boolean;
     policyId: string;
+    entitlements: string[];
+    metadata: Record<string, any>;
 };
 export declare type KeygenError = {
     code: string;

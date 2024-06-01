@@ -12,6 +12,7 @@ pub struct LicenseMeta {
     pub valid: bool,
     pub detail: String,
     pub code: String,
+    pub scope: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -27,6 +28,7 @@ pub struct LicenseAttributes {
     pub name: Option<String>,
     pub key: String,
     pub expiry: Option<String>,
+    pub metadata: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize, Clone)]

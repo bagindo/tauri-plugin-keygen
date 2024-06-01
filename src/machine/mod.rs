@@ -33,7 +33,7 @@ static ENGINE_NAME: &str = "WebView2";
 
 #[derive(Debug)]
 pub struct Machine {
-    pub id: String,
+    pub fingerprint: String,
     pub name: String,
     pub hostname: String,
     pub platform: String,
@@ -49,8 +49,8 @@ struct MachineFile {
 
 impl Machine {
     pub fn new(app_name: String, app_version: String) -> Self {
-        let id = machine_uid::get().unwrap_or("".into());
-        let name = format!("{} - {}", whoami::realname(), whoami::devicename());
+        let fingerprint = machine_uid::get().unwrap_or("".into());
+        let name = whoami::devicename();
         let hostname = whoami::fallible::hostname().unwrap_or("".into());
 
         // platform
@@ -69,7 +69,7 @@ impl Machine {
         );
 
         Self {
-            id,
+            fingerprint,
             name,
             hostname,
             platform,
@@ -91,13 +91,21 @@ impl Machine {
                     .into(),
             })?;
 
+        // make sure fingerprint is not an empty string
+        if self.fingerprint.is_empty() {
+            return Err(Error::LicenseErr {
+                code: "NO_FINGERPRINT".into(),
+                detail: "Can't activate this machine. Failed parsing machine fingerprint".into(),
+            });
+        }
+
         // prepare request
         let url = client.build_url("machines".into(), None)?;
         let body = serde_json::json!({
             "data": {
                 "type": "machines",
                 "attributes": {
-                    "fingerprint": self.id,
+                    "fingerprint": self.fingerprint,
                     "name": self.name,
                     "platform": self.platform
                 },
@@ -152,7 +160,7 @@ impl Machine {
             .get_license()
             .ok_or_else(|| Error::LicenseErr {
                 code: "NO_LICENSE".into(),
-                detail: "Can't checkout machine file. Current app state has no license. Call validate(key) first."
+                detail: "Can't checkout machine file. Current app state has no license. Call validateKey() first."
                 .into()
             })?;
 
@@ -173,7 +181,10 @@ impl Machine {
         }
 
         // build url
-        let mut params = vec![("encrypt", "1"), ("include", "license")];
+        let mut params = vec![
+            ("encrypt", "1"),
+            ("include", "license.entitlements,license"),
+        ];
 
         let ttl = ttl.to_string();
         if license.should_maintain_access() {
@@ -183,7 +194,7 @@ impl Machine {
         }
 
         let url = client.build_url(
-            format!("machines/{}/actions/check-out", self.id),
+            format!("machines/{}/actions/check-out", self.fingerprint),
             Some(params),
         )?;
 
@@ -201,15 +212,12 @@ impl Machine {
         let res_headers = response.headers().clone();
         let (res_text, res_json) = client.res_text_json(response).await?;
 
+        dbg!(&res_json);
+
         match res_status {
             StatusCode::OK => {
                 // verify signature
-                match client.verify_response(
-                    Method::POST.to_string(),
-                    url,
-                    res_headers,
-                    res_text.clone(),
-                ) {
+                match client.verify_response(Method::POST.to_string(), url, res_headers, res_text) {
                     Ok(_) => {
                         // map res json
                         let machine_file_res: MachineFileRes = serde_json::from_value(res_json)
@@ -220,7 +228,7 @@ impl Machine {
                         // get certificate
                         let cert = machine_file_res.data.attributes.certificate;
 
-                        // save to machine.lic
+                        // save to '[APP_DATA]/keygen/machine.lic'
                         self.save_machine_file(cert, app)?;
 
                         Ok(())
@@ -290,7 +298,7 @@ impl Machine {
 
         // hash the license key and machine id to obtain decryption key
         let mut sha = Sha256::new();
-        let secret = [license_key.as_bytes(), self.id.as_bytes()].concat();
+        let secret = [license_key.as_bytes(), self.fingerprint.as_bytes()].concat();
 
         sha.update(secret);
 

@@ -35,6 +35,7 @@ pub async fn get_license_key<R: Runtime>(
 }
 
 #[command]
+#[allow(clippy::too_many_arguments)]
 pub async fn validate_key<R: Runtime>(
     app: AppHandle<R>,
     _window: Window<R>,
@@ -42,6 +43,7 @@ pub async fn validate_key<R: Runtime>(
     client: State<'_, Mutex<KeygenClient>>,
     licensed_state: State<'_, Mutex<LicensedState>>,
     key: String,
+    entitlements: Vec<String>,
     cache_valid_response: bool,
 ) -> Result<License> {
     let machine = machine.lock().await;
@@ -49,7 +51,10 @@ pub async fn validate_key<R: Runtime>(
 
     let mut licensed_state = licensed_state.lock().await;
 
-    match licensed_state.validate_key(key, &machine, &client).await {
+    match licensed_state
+        .validate_key(key, entitlements, &machine, &client)
+        .await
+    {
         Ok((license, res_cache)) => {
             // update app state
             licensed_state.update(license.clone(), &app)?;

@@ -18,7 +18,7 @@ pub struct KeygenClient {
     product_id: String,
     verify_key: String,
     api_url: String,
-    api_url_prefix: String,
+    api_version: String,
     http_client: reqwest::Client,
     max_clock_drift: i64, // in minutes
     cache_lifetime: i64,  // in minutes
@@ -51,7 +51,7 @@ impl KeygenClient {
             product_id,
             verify_key,
             api_url: "https://api.keygen.sh".into(),
-            api_url_prefix: "v1".into(),
+            api_version: "v1".into(),
             http_client,
             max_clock_drift: 5,  // in minutes
             cache_lifetime: 240, // in minutes
@@ -63,29 +63,22 @@ impl KeygenClient {
     }
 
     pub fn build_url(&self, path: String, params: Option<Vec<(&str, &str)>>) -> Result<Url> {
-        // base url
-        let mut url = Url::parse(&self.api_url)
+        if self.api_version.is_empty() {
+            return Err(Error::PathErr("API version can't be empty".into()));
+        }
+
+        let base_url = Url::parse(&self.api_url)
             .map_err(|_| Error::ParseErr("Failed parsing base url".into()))?;
 
-        // full path
-        let mut full_path = String::from("");
-        if !self.api_url_prefix.is_empty() {
-            full_path.push_str(&self.api_url_prefix);
-        }
-        full_path.push_str(format!("/accounts/{}", self.account_id).as_str());
-        full_path.push_str(format!("/{}", path).as_str());
-        url.set_path(&full_path);
+        let full_path = format!("{}/accounts/{}/{}", self.api_version, self.account_id, path);
 
-        // query params
+        let mut url = base_url
+            .join(&full_path)
+            .map_err(|_| Error::ParseErr("Failed to join path to base url".into()))?;
+
         if let Some(params) = params {
-            let mut query: Vec<String> = Vec::new();
-
-            for param in params {
-                query.push(format!("{}={}", param.0, param.1));
-            }
-
-            if !query.is_empty() {
-                url.set_query(Some(&query.join("&")));
+            for (key, value) in params {
+                url.query_pairs_mut().append_pair(key, value);
             }
         }
 

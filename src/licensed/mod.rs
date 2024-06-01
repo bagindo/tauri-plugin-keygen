@@ -71,19 +71,35 @@ impl LicensedState {
     pub async fn validate_key(
         &mut self,
         key: String,
+        entitlements: Vec<String>,
         machine: &Machine,
         client: &KeygenClient,
     ) -> Result<(License, KeygenResponseCache)> {
+        // make sure fingerprint is not an empty string
+        if machine.fingerprint.is_empty() {
+            return Err(Error::LicenseErr {
+                code: "NO_FINGERPRINT".into(),
+                detail:
+                    "Can't validate license for this machine: Failed parsing machine fingerprint"
+                        .into(),
+            });
+        }
+
         // prepare request
         let url = client.build_url("licenses/actions/validate-key".into(), None)?;
-        let body = serde_json::json!({
+
+        let mut body = serde_json::json!({
             "meta": {
                 "key": key.trim_end(),
                 "scope": {
-                    "fingerprint": machine.id.clone()
+                    "fingerprint": machine.fingerprint.clone()
                 }
             }
         });
+
+        if !entitlements.is_empty() {
+            body["meta"]["scope"]["entitlements"] = serde_json::json!(entitlements);
+        }
 
         // request validation
         let response = client
@@ -113,7 +129,7 @@ impl LicensedState {
                                 )
                             })?;
 
-                        // not found
+                        // not found: no data
                         if lic_res.meta.code == "NOT_FOUND" {
                             return Err(Error::LicenseErr {
                                 code: lic_res.meta.code,
@@ -121,7 +137,7 @@ impl LicensedState {
                             });
                         }
 
-                        // lic_res should have data here
+                        // license response should have data here
                         // but just to be safe..
                         let license = License::from_license_response(lic_res).ok_or_else(|| {
                             Error::BadResponse("Missing data on license validation response".into())

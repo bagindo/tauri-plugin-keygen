@@ -17,47 +17,63 @@ pub struct MachineFileAttributes {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct MachineLicense {
-    pub meta: MachineMeta,
-    // included array can contain different types
-    // but since the request paramater on machine checkout
-    // is hardcoded to only include "license",
-    // this will do for now
-    pub included: Vec<IncludedLicense>,
+    pub meta: MachineLicenseMeta,
+    pub included: Vec<MachineLicenseIncluded>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct MachineMeta {
+pub struct MachineLicenseMeta {
     pub expiry: Option<String>,
     pub issued: String,
     pub ttl: Option<u64>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
+#[serde(tag = "type")]
+pub enum MachineLicenseIncluded {
+    #[serde(rename = "licenses")]
+    License(IncludedLicense),
+    #[serde(rename = "entitlements")]
+    Entitlement(IncludedEntitlements),
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct IncludedLicense {
     pub id: String,
-    pub attributes: LicenseAttributes,
-    pub relationships: LicenseRelationships,
+    pub attributes: IncludedLicenseAttributes,
+    pub relationships: IncludedLicenseRelationsips,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct LicenseAttributes {
+pub struct IncludedLicenseAttributes {
     pub name: Option<String>,
     pub key: String,
     pub expiry: String,
+    pub metadata: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct LicenseRelationships {
-    pub policy: LicensePolicy,
+pub struct IncludedLicenseRelationsips {
+    pub policy: IncludedLicensePolicy,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct LicensePolicy {
-    pub data: LicensePolicyData,
+pub struct IncludedLicensePolicy {
+    pub data: IncludedLicensePolicyData,
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct LicensePolicyData {
+pub struct IncludedLicensePolicyData {
     pub id: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct IncludedEntitlements {
+    pub attributes: IncludedEntitlementsAttributes,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct IncludedEntitlementsAttributes {
+    pub code: String,
 }
