@@ -2,7 +2,7 @@ pub mod sig;
 
 use crate::{err::Error, licensed::types::LicenseResponse, Result};
 use base64::Engine;
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Utc};
 use ed25519_dalek::{Verifier, VerifyingKey, PUBLIC_KEY_LENGTH, SIGNATURE_LENGTH};
 use hex::FromHex;
 use reqwest::{header::HeaderMap, Method, RequestBuilder, Response, Url};
@@ -11,11 +11,9 @@ use sig::KeygenSig;
 use std::fs;
 use std::path::PathBuf;
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct KeygenClient {
     account_id: String,
-    product_id: String,
     verify_key: String,
     api_url: String,
     api_version: String,
@@ -36,8 +34,10 @@ pub struct KeygenResponseCache {
 impl KeygenClient {
     pub fn new(
         account_id: String,
-        product_id: String,
         verify_key: String,
+        api_url: String,
+        api_version: String,
+        cache_lifetime: i64,
         user_agent: String,
     ) -> Self {
         // default client with user_agent
@@ -48,13 +48,12 @@ impl KeygenClient {
 
         Self {
             account_id,
-            product_id,
             verify_key,
-            api_url: "https://api.keygen.sh".into(),
-            api_version: "v1".into(),
+            api_url,
+            api_version,
             http_client,
-            max_clock_drift: 5,  // in minutes
-            cache_lifetime: 240, // in minutes
+            max_clock_drift: 5,
+            cache_lifetime,
         }
     }
 
@@ -63,10 +62,6 @@ impl KeygenClient {
     }
 
     pub fn build_url(&self, path: String, params: Option<Vec<(&str, &str)>>) -> Result<Url> {
-        if self.api_version.is_empty() {
-            return Err(Error::PathErr("API version can't be empty".into()));
-        }
-
         let base_url = Url::parse(&self.api_url)
             .map_err(|_| Error::ParseErr("Failed parsing base url".into()))?;
 
@@ -124,7 +119,7 @@ impl KeygenClient {
         let date_time = DateTime::parse_from_rfc2822(&sig.date())
             .map_err(|_| Error::BadResponse("Invalid signature date".into()))?;
 
-        let minutes_since_response = Local::now().signed_duration_since(date_time).num_minutes();
+        let minutes_since_response = Utc::now().signed_duration_since(date_time).num_minutes();
 
         // check request date
         if self.max_clock_drift >= 0 && minutes_since_response > self.max_clock_drift {
@@ -159,7 +154,7 @@ impl KeygenClient {
         let date_time = DateTime::parse_from_rfc2822(&sig.date())
             .map_err(|_| Error::BadCache("Failed parsing cached response date".into()))?;
 
-        let minutes_since_response = Local::now().signed_duration_since(date_time).num_minutes();
+        let minutes_since_response = Utc::now().signed_duration_since(date_time).num_minutes();
 
         // check request date
         if minutes_since_response > self.cache_lifetime {

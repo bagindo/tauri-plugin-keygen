@@ -19,21 +19,44 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Clone)]
 pub struct Builder {
     pub account_id: String,
-    pub product_id: String,
     pub verify_key: String,
+    pub api_url: String,
+    pub api_version: String,
+    pub cache_lifetime: i64, // in minutes
 }
 
 impl Builder {
-    pub fn new(
-        account_id: impl Into<String>,
-        product_id: impl Into<String>,
-        verify_key: impl Into<String>,
-    ) -> Self {
+    pub fn new(account_id: impl Into<String>, verify_key: impl Into<String>) -> Self {
         Self {
             account_id: account_id.into(),
-            product_id: product_id.into(),
             verify_key: verify_key.into(),
+            api_url: "https://api.keygen.sh".into(),
+            api_version: "v1".into(),
+            cache_lifetime: 240,
         }
+    }
+
+    pub fn api_url(mut self, api_url: impl Into<String>) -> Self {
+        self.api_url = api_url.into();
+        self
+    }
+
+    pub fn api_version(mut self, api_version: impl Into<String>) -> Self {
+        let v = api_version.into();
+        self.api_version = if v.is_empty() { "v1".to_string() } else { v };
+        self
+    }
+
+    pub fn cache_lifetime(mut self, cache_lifetime: i64) -> Self {
+        self.cache_lifetime = if cache_lifetime < 60 {
+            60 // min: 1 hour
+        } else if cache_lifetime > 525_600 {
+            525_600 // max: 1 year
+        } else {
+            cache_lifetime
+        };
+
+        self
     }
 
     pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
@@ -45,7 +68,7 @@ impl Builder {
                 commands::activate,
                 commands::checkout_machine,
             ])
-            .setup(|app| {
+            .setup(move |app| {
                 // get app info
                 let app_name = app.package_info().name.clone();
                 let app_version = app.package_info().version.to_string();
@@ -56,8 +79,10 @@ impl Builder {
                 // init keygen client
                 let keygen_client = KeygenClient::new(
                     self.account_id,
-                    self.product_id,
                     self.verify_key,
+                    self.api_url,
+                    self.api_version,
+                    self.cache_lifetime,
                     machine.user_agent.clone(),
                 );
 
