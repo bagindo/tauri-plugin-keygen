@@ -224,8 +224,6 @@ impl Machine {
         let res_headers = response.headers().clone();
         let (res_text, res_json) = client.res_text_json(response).await?;
 
-        dbg!(&res_json);
-
         match res_status {
             StatusCode::OK => {
                 // verify signature

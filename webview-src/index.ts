@@ -90,11 +90,7 @@ export async function checkoutMachine({
 }: {
   ttlSeconds: number;
 }): Promise<void> {
-  const min = 3600; // 1 hour
-  const max = 31556952; // 1 year
-  const ttl = ttlSeconds >= min && ttlSeconds <= max ? ttlSeconds : 3600;
-
   await invoke("plugin:keygen|checkout_machine", {
-    ttl,
+    ttl: ttlSeconds,
   });
 }
