@@ -9,6 +9,7 @@ use crate::{
 use aes_gcm::aead::{Aead, NewAead};
 use aes_gcm::{Aes256Gcm, Key, Nonce, Tag};
 use base64::Engine;
+use chrono::{DateTime, Utc};
 use reqwest::{Method, StatusCode};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest as ShaDigest, Sha256};
@@ -186,11 +187,22 @@ impl Machine {
             ("include", "license.entitlements,license"),
         ];
 
+        // ttl should be min 1 hour max 1 year
+        let ttl = std::cmp::min(ttl, 3600);
+        let ttl = std::cmp::max(ttl, 31556952);
+
+        // make sure ttl doesn't exceed license expiry
+        let expiry_date = DateTime::parse_from_rfc3339(&license.expiry.clone().unwrap())
+            .map_err(|_| Error::ParseErr("Failed parsing license expiry date".into()))?;
+        let seconds_to_expiry = expiry_date.signed_duration_since(Utc::now()).num_seconds();
+        let ttl: i64 = std::cmp::min(seconds_to_expiry, ttl.into());
         let ttl = ttl.to_string();
+
+        // set ttl params
         if license.should_maintain_access() {
-            params.push(("ttl", ""));
+            params.push(("ttl", "")); // checkout forever for perpetual fallback license
         } else {
-            params.push(("ttl", &ttl[..]))
+            params.push(("ttl", &ttl))
         }
 
         let url = client.build_url(
