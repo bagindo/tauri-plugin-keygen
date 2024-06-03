@@ -27,6 +27,15 @@ impl License {
         self.valid && self.code == "EXPIRED"
     }
 
+    pub fn has_expired(&self) -> bool {
+        self.expiry
+            .clone()
+            .and_then(|expiry| DateTime::parse_from_rfc3339(&expiry).ok())
+            .map_or(true, |expiry_date| {
+                expiry_date.signed_duration_since(Utc::now()).num_minutes() <= 0
+            })
+    }
+
     pub fn from_license_response(lic_res: LicenseResponse) -> Option<Self> {
         match lic_res.data {
             Some(lic_data) => {

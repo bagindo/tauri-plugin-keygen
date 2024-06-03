@@ -50,8 +50,16 @@ impl LicensedState {
             // load from response cache
             if let Some((res_cache, cache_path)) = Self::get_response_cache(app, key)? {
                 let lic_res = client.verify_response_cache(res_cache, cache_path)?;
-                let license = License::from_license_response(lic_res);
-                return Ok(Self { license });
+
+                // client.verify_response_cache() verified that res_cache.sig.date is within the allowed client.cache_lifetime.
+                // However, it's possible that the cache_lifetime (e.g. set for a month) might exceeed the license expiry date (e.g. expired in 7 days).
+                if let Some(license) = License::from_license_response(lic_res) {
+                    if !license.has_expired() {
+                        return Ok(Self {
+                            license: Some(license),
+                        });
+                    }
+                }
             }
         }
 
