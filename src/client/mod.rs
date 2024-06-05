@@ -11,15 +11,22 @@ use reqwest::{
 };
 use serde::{Deserialize, Serialize};
 use sig::KeygenSig;
-use std::fs;
-use std::path::PathBuf;
+use std::{fmt, fs, path::PathBuf};
+
+#[derive(Clone, Debug)]
+pub struct KeygenVersion(u8, u8);
+
+impl fmt::Display for KeygenVersion {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}.{}", self.0, self.1)
+    }
+}
 
 #[derive(Debug)]
 pub struct KeygenClient {
     account_id: String,
     verify_key: String,
     api_url: String,
-    api_version: String,
     http_client: reqwest::Client,
     max_clock_drift: i64, // in minutes
     cache_lifetime: i64,  // in minutes
@@ -39,12 +46,12 @@ impl KeygenClient {
         account_id: String,
         verify_key: String,
         api_url: String,
-        api_version: String,
+        version_header: Option<KeygenVersion>,
         cache_lifetime: i64,
         user_agent: String,
     ) -> Self {
         // client with default headers
-        let default_headers = Self::get_default_headers(user_agent);
+        let default_headers = Self::get_default_headers(user_agent, version_header);
 
         let http_client = reqwest::Client::builder()
             .default_headers(default_headers)
@@ -55,16 +62,20 @@ impl KeygenClient {
             account_id,
             verify_key,
             api_url,
-            api_version,
             http_client,
             max_clock_drift: 5,
             cache_lifetime,
         }
     }
 
-    fn get_default_headers(user_agent: String) -> HeaderMap {
+    fn get_default_headers(user_agent: String, version_header: Option<KeygenVersion>) -> HeaderMap {
         let mut headers = HeaderMap::new();
         headers.insert(USER_AGENT, Self::get_header_value(&user_agent));
+
+        if let Some(v) = version_header {
+            headers.insert("Keygen-Version", Self::get_header_value(&v.to_string()));
+        }
+
         headers
     }
 
@@ -91,7 +102,7 @@ impl KeygenClient {
         let base_url = Url::parse(&self.api_url)
             .map_err(|_| Error::ParseErr("Failed parsing base url".into()))?;
 
-        let full_path = format!("{}/accounts/{}/{}", self.api_version, self.account_id, path);
+        let full_path = format!("v1/accounts/{}/{}", self.account_id, path);
 
         let mut url = base_url
             .join(&full_path)

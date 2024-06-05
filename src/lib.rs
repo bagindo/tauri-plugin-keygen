@@ -21,7 +21,7 @@ pub struct Builder {
     pub account_id: String,
     pub verify_key: String,
     pub api_url: String,
-    pub api_version: String,
+    pub version_header: Option<KeygenVersion>,
     pub cache_lifetime: i64, // in minutes
 }
 
@@ -31,7 +31,7 @@ impl Builder {
             account_id: account_id.into(),
             verify_key: verify_key.into(),
             api_url: "https://api.keygen.sh".into(),
-            api_version: "v1".into(),
+            version_header: None,
             cache_lifetime: 240,
         }
     }
@@ -41,9 +41,8 @@ impl Builder {
         self
     }
 
-    pub fn api_version(mut self, api_version: impl Into<String>) -> Self {
-        let v = api_version.into();
-        self.api_version = if v.is_empty() { "v1".to_string() } else { v };
+    pub fn version_header(mut self, version_header: Option<KeygenVersion>) -> Self {
+        self.version_header = version_header;
         self
     }
 
@@ -81,7 +80,7 @@ impl Builder {
                     self.account_id,
                     self.verify_key,
                     self.api_url,
-                    self.api_version,
+                    self.version_header,
                     self.cache_lifetime,
                     machine.user_agent.clone(),
                 );
