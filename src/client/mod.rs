@@ -1,6 +1,6 @@
 pub mod sig;
 
-use crate::{err::Error, licensed::types::LicenseResponse, Result};
+use crate::{err::Error, licensed::types::LicenseResponse, KeygenVersion, Result};
 use base64::Engine;
 use chrono::{DateTime, Utc};
 use ed25519_dalek::{Verifier, VerifyingKey, PUBLIC_KEY_LENGTH, SIGNATURE_LENGTH};
@@ -11,22 +11,14 @@ use reqwest::{
 };
 use serde::{Deserialize, Serialize};
 use sig::KeygenSig;
-use std::{fmt, fs, path::PathBuf};
-
-#[derive(Clone, Debug)]
-pub struct KeygenVersion(u8, u8);
-
-impl fmt::Display for KeygenVersion {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}.{}", self.0, self.1)
-    }
-}
+use std::{fs, path::PathBuf};
 
 #[derive(Debug)]
 pub struct KeygenClient {
-    account_id: String,
+    custom_domain: Option<String>,
+    account_id: Option<String>,
     verify_key: String,
-    api_url: String,
+    api_url: Option<String>,
     http_client: reqwest::Client,
     max_clock_drift: i64, // in minutes
     cache_lifetime: i64,  // in minutes
@@ -43,9 +35,10 @@ pub struct KeygenResponseCache {
 
 impl KeygenClient {
     pub fn new(
-        account_id: String,
+        custom_domain: Option<String>,
+        api_url: Option<String>,
+        account_id: Option<String>,
         verify_key: String,
-        api_url: String,
         version_header: Option<KeygenVersion>,
         cache_lifetime: i64,
         user_agent: String,
@@ -59,6 +52,7 @@ impl KeygenClient {
             .unwrap_or_default();
 
         Self {
+            custom_domain,
             account_id,
             verify_key,
             api_url,
@@ -99,10 +93,11 @@ impl KeygenClient {
     }
 
     pub fn build_url(&self, path: String, params: Option<Vec<(&str, &str)>>) -> Result<Url> {
-        let base_url = Url::parse(&self.api_url)
-            .map_err(|_| Error::ParseErr("Failed parsing base url".into()))?;
+        // get base url
+        let base_url = self.get_base_url()?;
 
-        let full_path = format!("v1/accounts/{}/{}", self.account_id, path);
+        // get full path
+        let full_path = self.get_full_path(&path)?;
 
         let mut url = base_url
             .join(&full_path)
@@ -115,6 +110,43 @@ impl KeygenClient {
         }
 
         Ok(url)
+    }
+
+    fn get_base_url(&self) -> Result<Url> {
+        if let Some(custom_domain) = &self.custom_domain {
+            let url = Url::parse(custom_domain).map_err(|_| {
+                Error::ParseErr(format!("Failed parsing base url: {}", custom_domain))
+            })?;
+            return Ok(url);
+        }
+
+        if let Some(api_url) = &self.api_url {
+            let url = Url::parse(api_url)
+                .map_err(|_| Error::ParseErr(format!("Failed parsing base url: {}", api_url)))?;
+            return Ok(url);
+        }
+
+        Err(Error::ParseErr(
+            "Failed getting base url: neither custom_domain nor api_url is provided".into(),
+        ))
+    }
+
+    fn get_full_path(&self, path: &String) -> Result<String> {
+        if self.custom_domain.is_some() {
+            return Ok(format!("v1/{}", path));
+        }
+
+        if self.api_url.is_some() {
+            if let Some(account_id) = &self.account_id {
+                return Ok(format!("v1/accounts/{}/{}", account_id, path));
+            } else {
+                return Err(Error::ParseErr(
+                    "Error parsing url: missing account_id".into(),
+                ));
+            }
+        }
+
+        Err(Error::ParseErr("Error parsing url path".into()))
     }
 
     // both response.text() and response.json() consumed its Self.
