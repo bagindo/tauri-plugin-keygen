@@ -5,7 +5,10 @@ use base64::Engine;
 use chrono::{DateTime, Utc};
 use ed25519_dalek::{Verifier, VerifyingKey, PUBLIC_KEY_LENGTH, SIGNATURE_LENGTH};
 use hex::FromHex;
-use reqwest::{header::HeaderMap, Method, RequestBuilder, Response, Url};
+use reqwest::{
+    header::{HeaderMap, HeaderValue, USER_AGENT},
+    Method, RequestBuilder, Response, Url,
+};
 use serde::{Deserialize, Serialize};
 use sig::KeygenSig;
 use std::fs;
@@ -40,9 +43,11 @@ impl KeygenClient {
         cache_lifetime: i64,
         user_agent: String,
     ) -> Self {
-        // default client with user_agent
+        // client with default headers
+        let default_headers = Self::get_default_headers(user_agent);
+
         let http_client = reqwest::Client::builder()
-            .user_agent(user_agent)
+            .default_headers(default_headers)
             .build()
             .unwrap_or_default();
 
@@ -55,6 +60,27 @@ impl KeygenClient {
             max_clock_drift: 5,
             cache_lifetime,
         }
+    }
+
+    fn get_default_headers(user_agent: String) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert(USER_AGENT, Self::get_header_value(&user_agent));
+        headers
+    }
+
+    fn get_header_value(input: &str) -> HeaderValue {
+        // HeaderValue::from_str() only allows visible ASCII characters (32-127).
+        // This might be an extra un-necessary precaution,
+        // but this way it's safe to unwrap(), instead of having to return a Result type.
+        let input = input
+            .chars()
+            .filter(|c| {
+                let ascii = *c as u32;
+                (32..=127).contains(&ascii)
+            })
+            .collect::<String>();
+
+        HeaderValue::from_str(&input).unwrap()
     }
 
     pub fn post(&self, url: String) -> RequestBuilder {
