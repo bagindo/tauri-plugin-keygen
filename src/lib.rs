@@ -77,8 +77,8 @@ impl Builder {
     pub fn cache_lifetime(mut self, cache_lifetime: i64) -> Self {
         self.cache_lifetime = if cache_lifetime < 60 {
             60 // min: 1 hour
-        } else if cache_lifetime > 525_600 {
-            525_600 // max: 1 year
+        } else if cache_lifetime > 44_640 {
+            44_640 // max: 31 days
         } else {
             cache_lifetime
         };
