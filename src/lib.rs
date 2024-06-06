@@ -8,7 +8,6 @@ use client::KeygenClient;
 use err::Error;
 use licensed::*;
 use machine::Machine;
-use std::fmt;
 use tauri::{
     plugin::{Builder as PluginBuilder, TauriPlugin},
     Manager, Runtime,
@@ -17,22 +16,13 @@ use tokio::sync::Mutex;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Debug)]
-pub struct KeygenVersion(pub u8, pub u8);
-
-impl fmt::Display for KeygenVersion {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}.{}", self.0, self.1)
-    }
-}
-
 #[derive(Clone)]
 pub struct Builder {
     pub custom_domain: Option<String>,
     pub api_url: Option<String>,
     pub account_id: Option<String>,
     pub verify_key: String,
-    pub version_header: Option<KeygenVersion>,
+    pub version_header: Option<String>,
     pub cache_lifetime: i64, // in minutes
 }
 
@@ -69,8 +59,8 @@ impl Builder {
         self
     }
 
-    pub fn version_header(mut self, version_header: KeygenVersion) -> Self {
-        self.version_header = Some(version_header);
+    pub fn version_header(mut self, version_header: impl Into<String>) -> Self {
+        self.version_header = Some(version_header.into());
         self
     }
 

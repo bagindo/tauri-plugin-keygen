@@ -1,6 +1,6 @@
 pub mod sig;
 
-use crate::{err::Error, licensed::types::LicenseResponse, KeygenVersion, Result};
+use crate::{err::Error, licensed::types::LicenseResponse, Result};
 use base64::Engine;
 use chrono::{DateTime, Utc};
 use ed25519_dalek::{Verifier, VerifyingKey, PUBLIC_KEY_LENGTH, SIGNATURE_LENGTH};
@@ -40,7 +40,7 @@ impl KeygenClient {
         api_url: Option<String>,
         account_id: Option<String>,
         verify_key: String,
-        version_header: Option<KeygenVersion>,
+        version_header: Option<String>,
         cache_lifetime: i64,
         user_agent: String,
     ) -> Self {
@@ -64,12 +64,12 @@ impl KeygenClient {
         }
     }
 
-    fn get_default_headers(user_agent: String, version_header: Option<KeygenVersion>) -> HeaderMap {
+    fn get_default_headers(user_agent: String, version_header: Option<String>) -> HeaderMap {
         let mut headers = HeaderMap::new();
         headers.insert(USER_AGENT, Self::get_header_value(&user_agent));
 
         if let Some(v) = version_header {
-            headers.insert("Keygen-Version", Self::get_header_value(&v.to_string()));
+            headers.insert("Keygen-Version", Self::get_header_value(&v));
         }
 
         headers
