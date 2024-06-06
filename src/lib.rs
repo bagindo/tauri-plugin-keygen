@@ -94,6 +94,7 @@ impl Builder {
                 commands::validate_key,
                 commands::activate,
                 commands::checkout_machine,
+                commands::reset_license,
             ])
             .setup(move |app| {
                 // get app info

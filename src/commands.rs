@@ -56,13 +56,13 @@ pub async fn validate_key<R: Runtime>(
         .await
     {
         Ok((license, res_cache)) => {
-            // update app state
-            licensed_state.update(license.clone(), &app)?;
-
             // cache valid response
             if license.valid && cache_valid_response && license.expiry.is_some() {
-                LicensedState::cache_response(&app, license.key.clone(), res_cache)?;
+                LicensedState::cache_response(&app, &license.key, res_cache)?;
             }
+
+            // update app state
+            licensed_state.update(Some(license.clone()), &app)?;
 
             Ok(license)
         }
@@ -115,4 +115,24 @@ pub async fn checkout_machine<R: Runtime>(
             Err(err.into())
         }
     }
+}
+
+#[command]
+pub async fn reset_license<R: Runtime>(
+    app: AppHandle<R>,
+    _window: Window<R>,
+    licensed_state: State<'_, Mutex<LicensedState>>,
+    hard_reset: bool,
+) -> Result<()> {
+    let mut licensed_state = licensed_state.lock().await;
+
+    licensed_state.update(None, &app)?;
+
+    if hard_reset {
+        LicensedState::clear_response_cache(&app)?;
+        LicensedState::remove_cached_license_key(&app)?;
+        Machine::remove_machine_file(&app)?;
+    }
+
+    Ok(())
 }

@@ -67,7 +67,7 @@ export async function validateCheckoutKey({
   key: string;
   ttlSeconds: number;
   entitlements?: string[];
-}) {
+}): Promise<KeygenLicense> {
   const license = (await validateKey({
     key,
     entitlements,
@@ -92,5 +92,11 @@ export async function checkoutMachine({
 }): Promise<void> {
   await invoke("plugin:keygen|checkout_machine", {
     ttl: ttlSeconds,
+  });
+}
+
+export async function resetLicense(hardReset: boolean = false): Promise<void> {
+  return await invoke("plugin:keygen|reset_license", {
+    hardReset,
   });
 }

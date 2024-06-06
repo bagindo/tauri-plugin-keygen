@@ -13,7 +13,7 @@ use reqwest::{Method, StatusCode};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::{
-    fs::{create_dir_all, read_to_string, File},
+    fs::{self, File},
     io::Write,
     path::PathBuf,
     time::Duration,
@@ -34,7 +34,7 @@ impl LicensedState {
     ) -> Result<Self> {
         if let Some(key) = Self::get_cached_license_key(app)? {
             // load from machine file
-            match machine.load_machine_file(key.clone(), client, app) {
+            match machine.load_machine_file(&key, client, app) {
                 Ok(Some(machine_license)) => match License::from_machine_license(machine_license) {
                     Ok(license) => return Ok(Self { license }),
                     Err(e) => {
@@ -48,7 +48,7 @@ impl LicensedState {
             }
 
             // load from response cache
-            if let Some((res_cache, cache_path)) = Self::get_response_cache(app, key)? {
+            if let Some((res_cache, cache_path)) = Self::get_response_cache(app, &key)? {
                 let lic_res = client.verify_response_cache(res_cache, cache_path)?;
 
                 // client.verify_response_cache() verified that res_cache.sig.date is within the allowed client.cache_lifetime.
@@ -68,15 +68,16 @@ impl LicensedState {
 
     pub(crate) fn update<R: Runtime>(
         &mut self,
-        license: License,
+        license: Option<License>,
         app: &AppHandle<R>,
     ) -> Result<()> {
+        if let Some(license) = &license {
+            // cache license key
+            Self::cache_license_key(&license.key, app)?;
+        }
+
         // update state
-        self.license = Some(license.clone());
-
-        // save license key
-        Self::cache_license_key(license.key, app)?;
-
+        self.license = license;
         Ok(())
     }
 
@@ -168,8 +169,8 @@ impl LicensedState {
         }
     }
 
-    fn cache_license_key<R: Runtime>(key: String, app: &AppHandle<R>) -> Result<()> {
-        let path = Self::license_key_cache_path(app)?;
+    fn cache_license_key<R: Runtime>(key: &String, app: &AppHandle<R>) -> Result<()> {
+        let path = Self::get_license_key_cache_path(app)?;
 
         let mut f = File::create(path)?;
         f.write_all(key.as_bytes())?;
@@ -178,19 +179,29 @@ impl LicensedState {
     }
 
     pub fn get_cached_license_key<R: Runtime>(app: &AppHandle<R>) -> Result<Option<String>> {
-        let path = Self::license_key_cache_path(app)?;
+        let path = Self::get_license_key_cache_path(app)?;
 
         // no license key
         if !path.exists() {
             return Ok(None);
         }
 
-        let key = read_to_string(path)?;
+        let key = fs::read_to_string(path)?;
 
         Ok(Some(key))
     }
 
-    fn license_key_cache_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf> {
+    pub fn remove_cached_license_key<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
+        let path = Self::get_license_key_cache_path(app)?;
+
+        if path.exists() {
+            fs::remove_file(&path)?;
+        }
+
+        Ok(())
+    }
+
+    fn get_license_key_cache_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf> {
         // get app data dir
         let data_dir = app
             .path_resolver()
@@ -201,7 +212,7 @@ impl LicensedState {
         let keygen_cache_dir = data_dir.join("keygen");
 
         if !keygen_cache_dir.exists() {
-            create_dir_all(&keygen_cache_dir)?;
+            fs::create_dir_all(&keygen_cache_dir)?;
         }
 
         // dir path
@@ -212,11 +223,11 @@ impl LicensedState {
 
     pub(crate) fn cache_response<R: Runtime>(
         app: &AppHandle<R>,
-        license_key: String,
+        license_key: &String,
         cache: KeygenResponseCache,
     ) -> Result<()> {
         // cache path
-        let path = Self::response_cache_path(app, license_key)?;
+        let path = Self::get_response_cache_path(app, license_key)?;
 
         // cache content
         let cache_text = serde_json::to_string(&cache)
@@ -228,12 +239,23 @@ impl LicensedState {
         Ok(())
     }
 
+    pub fn clear_response_cache<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
+        // cache dir
+        let keygen_cache_dir = Self::get_response_cache_dir(app)?;
+
+        if keygen_cache_dir.exists() {
+            fs::remove_dir_all(&keygen_cache_dir)?;
+        }
+
+        Ok(())
+    }
+
     fn get_response_cache<R: Runtime>(
         app: &AppHandle<R>,
-        license_key: String,
+        license_key: &String,
     ) -> Result<Option<(KeygenResponseCache, PathBuf)>> {
         // cache path
-        let path = Self::response_cache_path(app, license_key)?;
+        let path = Self::get_response_cache_path(app, license_key)?;
 
         // no license cache
         if !path.exists() {
@@ -241,7 +263,7 @@ impl LicensedState {
         }
 
         // cache content
-        let cache_text = read_to_string(&path)?;
+        let cache_text = fs::read_to_string(&path)?;
         let cache_json: serde_json::Value = serde_json::from_str(&cache_text)
             .map_err(|_| Error::ParseErr("Failed parsing response cache to json".into()))?;
         let cache: KeygenResponseCache = serde_json::from_value(cache_json)
@@ -250,18 +272,15 @@ impl LicensedState {
         Ok(Some((cache, path)))
     }
 
-    fn response_cache_path<R: Runtime>(app: &AppHandle<R>, license_key: String) -> Result<PathBuf> {
-        // get app data dir
-        let data_dir = app
-            .path_resolver()
-            .app_data_dir()
-            .ok_or_else(|| Error::PathErr("Can't resolve app data dir".into()))?;
-
+    fn get_response_cache_path<R: Runtime>(
+        app: &AppHandle<R>,
+        license_key: &String,
+    ) -> Result<PathBuf> {
         // get cache dir
-        let keygen_cache_dir = data_dir.join("keygen/validation_cache");
+        let keygen_cache_dir = Self::get_response_cache_dir(app)?;
 
         if !keygen_cache_dir.exists() {
-            create_dir_all(&keygen_cache_dir)?;
+            fs::create_dir_all(&keygen_cache_dir)?;
         }
 
         // get path
@@ -273,5 +292,18 @@ impl LicensedState {
         let dir_path = keygen_cache_dir.join(path);
 
         Ok(dir_path)
+    }
+
+    fn get_response_cache_dir<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf> {
+        // get app data dir
+        let data_dir = app
+            .path_resolver()
+            .app_data_dir()
+            .ok_or_else(|| Error::PathErr("Can't resolve app data dir".into()))?;
+
+        // get cache dir
+        let keygen_cache_dir = data_dir.join("keygen/validation_cache");
+
+        Ok(keygen_cache_dir)
     }
 }

@@ -252,12 +252,12 @@ impl Machine {
 
     pub fn load_machine_file<R: Runtime>(
         &self,
-        license_key: String,
+        license_key: &String,
         client: &KeygenClient,
         app: &AppHandle<R>,
     ) -> Result<Option<MachineLicense>> {
         // machine file path
-        let path = self.machine_file_path(app)?;
+        let path = Self::get_machine_file_path(app)?;
 
         // no machine file
         if !path.exists() {
@@ -276,7 +276,7 @@ impl Machine {
     fn decrypt_machine_file(
         &self,
         cert: String,
-        license_key: String,
+        license_key: &String,
         client: &KeygenClient,
     ) -> Result<MachineLicense> {
         // Extract the encoded payload from the machine file.
@@ -355,7 +355,7 @@ impl Machine {
     }
 
     fn save_machine_file<R: Runtime>(&self, cert: String, app: &AppHandle<R>) -> Result<()> {
-        let path = self.machine_file_path(app)?;
+        let path = Self::get_machine_file_path(app)?;
 
         let mut f = File::create(path)?;
         f.write_all(cert.as_bytes())?;
@@ -363,7 +363,13 @@ impl Machine {
         Ok(())
     }
 
-    fn machine_file_path<R: Runtime>(&self, app: &AppHandle<R>) -> Result<PathBuf> {
+    pub fn remove_machine_file<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
+        let path = Self::get_machine_file_path(app)?;
+        fs::remove_file(path)?;
+        Ok(())
+    }
+
+    fn get_machine_file_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf> {
         // get app data dir
         let data_dir = app
             .path_resolver()

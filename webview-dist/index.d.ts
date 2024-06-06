@@ -28,3 +28,4 @@ export declare function activateMachine(): Promise<KeygenLicense>;
 export declare function checkoutMachine({ ttlSeconds, }: {
     ttlSeconds: number;
 }): Promise<void>;
+export declare function resetLicense(hardReset?: boolean): Promise<void>;
