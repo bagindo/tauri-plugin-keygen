@@ -35,7 +35,7 @@ pub struct KeygenResponseCache {
 }
 
 impl KeygenClient {
-    pub fn new(
+    pub(crate) fn new(
         custom_domain: Option<String>,
         api_url: Option<String>,
         account_id: Option<String>,
@@ -90,11 +90,11 @@ impl KeygenClient {
         HeaderValue::from_str(&input).unwrap()
     }
 
-    pub fn post(&self, url: String) -> RequestBuilder {
+    pub(crate) fn post(&self, url: String) -> RequestBuilder {
         self.http_client.request(Method::POST, url)
     }
 
-    pub fn build_url(&self, path: String, params: Option<Vec<(&str, &str)>>) -> Result<Url> {
+    pub(crate) fn build_url(&self, path: String, params: Option<Vec<(&str, &str)>>) -> Result<Url> {
         // get base url
         let base_url = self.get_base_url()?;
 
@@ -157,7 +157,7 @@ impl KeygenClient {
     // both response.text() and response.json() consumed its Self.
     // can't call .text() after calling .json() - or vice versa.
     // and since Response doesn't implement Clone..
-    pub async fn res_text_json(&self, response: Response) -> Result<(String, serde_json::Value)> {
+    pub(crate) async fn res_text_json(&self, response: Response) -> Result<(String, serde_json::Value)> {
         let res_text = response
             .text()
             .await
@@ -169,7 +169,7 @@ impl KeygenClient {
         Ok((res_text, res_json))
     }
 
-    pub fn verify_response(
+    pub(crate) fn verify_response(
         &self,
         req_method: String,
         req_url: Url,
@@ -216,7 +216,7 @@ impl KeygenClient {
         }
     }
 
-    pub fn verify_response_cache(
+    pub(crate) fn verify_response_cache(
         &self,
         res_cache: KeygenResponseCache,
         cache_path: PathBuf,
@@ -257,7 +257,7 @@ impl KeygenClient {
         }
     }
 
-    pub fn verify_signature(
+    pub(crate) fn verify_signature(
         &self,
         data: String,
         signature: String,

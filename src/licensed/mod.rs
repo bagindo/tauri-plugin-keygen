@@ -27,7 +27,7 @@ pub struct LicensedState {
 }
 
 impl LicensedState {
-    pub fn load<R: Runtime>(
+    pub(crate) fn load<R: Runtime>(
         app: &AppHandle<R>,
         client: &KeygenClient,
         machine: &Machine,
@@ -81,11 +81,11 @@ impl LicensedState {
         Ok(())
     }
 
-    pub fn get_license(&self) -> Option<License> {
+    pub(crate) fn get_license(&self) -> Option<License> {
         self.license.clone()
     }
 
-    pub async fn validate_key(
+    pub(crate) async fn validate_key(
         &mut self,
         key: String,
         entitlements: Vec<String>,
@@ -178,7 +178,7 @@ impl LicensedState {
         Ok(())
     }
 
-    pub fn get_cached_license_key<R: Runtime>(app: &AppHandle<R>) -> Result<Option<String>> {
+    pub(crate) fn get_cached_license_key<R: Runtime>(app: &AppHandle<R>) -> Result<Option<String>> {
         let path = Self::get_license_key_cache_path(app)?;
 
         // no license key
@@ -191,7 +191,7 @@ impl LicensedState {
         Ok(Some(key))
     }
 
-    pub fn remove_cached_license_key<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
+    pub(crate) fn remove_cached_license_key<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
         let path = Self::get_license_key_cache_path(app)?;
 
         if path.exists() {
@@ -239,7 +239,7 @@ impl LicensedState {
         Ok(())
     }
 
-    pub fn clear_response_cache<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
+    pub(crate) fn clear_response_cache<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
         // cache dir
         let keygen_cache_dir = Self::get_response_cache_dir(app)?;
 

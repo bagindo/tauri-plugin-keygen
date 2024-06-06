@@ -23,11 +23,11 @@ pub struct License {
 }
 
 impl License {
-    pub fn should_maintain_access(&self) -> bool {
+    pub(crate) fn should_maintain_access(&self) -> bool {
         self.valid && self.code == "EXPIRED"
     }
 
-    pub fn has_expired(&self) -> bool {
+    pub(crate) fn has_expired(&self) -> bool {
         self.expiry
             .clone()
             .and_then(|expiry| DateTime::parse_from_rfc3339(&expiry).ok())
@@ -36,7 +36,7 @@ impl License {
             })
     }
 
-    pub fn from_license_response(lic_res: LicenseResponse) -> Option<Self> {
+    pub(crate) fn from_license_response(lic_res: LicenseResponse) -> Option<Self> {
         match lic_res.data {
             Some(lic_data) => {
                 // get license policy id
@@ -69,7 +69,7 @@ impl License {
         }
     }
 
-    pub fn from_machine_license(machine_license: MachineLicense) -> Result<Option<Self>> {
+    pub(crate) fn from_machine_license(machine_license: MachineLicense) -> Result<Option<Self>> {
         // if machine file expiry exists, check validity
         if let Some(expiry) = machine_license.meta.expiry {
             if Self::has_machine_file_expired(machine_license.meta.issued, expiry)? {
