@@ -157,7 +157,7 @@ impl KeygenClient {
     // both response.text() and response.json() consumed its Self.
     // can't call .text() after calling .json() - or vice versa.
     // and since Response doesn't implement Clone..
-    pub(crate) async fn res_text_json(&self, response: Response) -> Result<(String, serde_json::Value)> {
+    pub async fn res_text_json(&self, response: Response) -> Result<(String, serde_json::Value)> {
         let res_text = response
             .text()
             .await
