@@ -19,6 +19,7 @@ pub struct KeygenClient {
     account_id: Option<String>,
     verify_key: String,
     api_url: Option<String>,
+    api_version: u8, // Keygen API major version
     http_client: reqwest::Client,
     max_clock_drift: i64, // in minutes
     cache_lifetime: i64,  // in minutes
@@ -56,6 +57,7 @@ impl KeygenClient {
             account_id,
             verify_key,
             api_url,
+            api_version: 1,
             http_client,
             max_clock_drift: 5,
             cache_lifetime,
@@ -133,12 +135,15 @@ impl KeygenClient {
 
     fn get_full_path(&self, path: &String) -> Result<String> {
         if self.custom_domain.is_some() {
-            return Ok(format!("v1/{}", path));
+            return Ok(format!("v{}/{}", self.api_version, path));
         }
 
         if self.api_url.is_some() {
             if let Some(account_id) = &self.account_id {
-                return Ok(format!("v1/accounts/{}/{}", account_id, path));
+                return Ok(format!(
+                    "v{}/accounts/{}/{}",
+                    self.api_version, account_id, path
+                ));
             } else {
                 return Err(Error::ParseErr(
                     "Error parsing url: missing account_id".into(),
