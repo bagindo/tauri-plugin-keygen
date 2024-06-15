@@ -36,7 +36,6 @@ static ENGINE_NAME: &str = "WebView2";
 pub struct Machine {
     pub fingerprint: String,
     pub name: String,
-    pub hostname: String,
     pub platform: String,
     pub user_agent: String,
 }
@@ -52,7 +51,6 @@ impl Machine {
     pub(crate) fn new(app_name: String, app_version: String) -> Self {
         let fingerprint = machine_uid::get().unwrap_or("".into());
         let name = whoami::devicename();
-        let hostname = whoami::fallible::hostname().unwrap_or("".into());
 
         // platform
         let os_name = format!("{}", whoami::platform());
@@ -72,7 +70,6 @@ impl Machine {
         Self {
             fingerprint,
             name,
-            hostname,
             platform,
             user_agent,
         }
@@ -197,8 +194,7 @@ impl Machine {
         ];
 
         // ttl should be min 1 hour max 1 year
-        let ttl_seconds = std::cmp::max(ttl_seconds, 3600);
-        let ttl_seconds = std::cmp::min(ttl_seconds, 31_556_952);
+        let ttl_seconds = ttl_seconds.clamp(3600, 31_556_952);
 
         // make sure ttl doesn't exceed license expiry
         let expiry_date = DateTime::parse_from_rfc3339(&license.expiry.clone().unwrap())

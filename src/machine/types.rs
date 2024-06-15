@@ -25,6 +25,7 @@ pub struct MachineLicense {
 pub struct MachineLicenseMeta {
     pub expiry: Option<String>,
     pub issued: String,
+    #[allow(dead_code)]
     pub ttl: Option<u64>,
 }
 
@@ -47,6 +48,7 @@ pub struct IncludedLicense {
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct IncludedLicenseAttributes {
+    #[allow(dead_code)]
     pub name: Option<String>,
     pub key: String,
     pub expiry: String,

@@ -8,6 +8,7 @@ pub struct LicenseResponse {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct LicenseMeta {
+    #[allow(dead_code)]
     pub ts: String,
     pub valid: bool,
     pub detail: String,
@@ -25,6 +26,7 @@ pub struct LicenseData {
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LicenseAttributes {
+    #[allow(dead_code)]
     pub name: Option<String>,
     pub key: String,
     pub expiry: Option<String>,

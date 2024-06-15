@@ -77,15 +77,8 @@ pub struct APIErrors {
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct APIError {
-    pub title: Option<String>,
     pub detail: Option<String>,
     pub code: Option<String>,
-    pub source: Option<APIErrorSource>,
-}
-
-#[derive(Debug, Deserialize, Clone, Default)]
-pub struct APIErrorSource {
-    pub pointer: Option<String>,
 }
 
 pub fn parse_err_json(status_code: StatusCode, err: serde_json::Value) -> Error {
