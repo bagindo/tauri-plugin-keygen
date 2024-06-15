@@ -182,6 +182,14 @@ impl Machine {
             });
         }
 
+        // license shouldn't be expired yet
+        if license.has_expired() && !license.should_maintain_access() {
+            return Err(Error::LicenseErr {
+                code: "EXPIRED".into(),
+                detail: "Can't checkout machine file. License has expired".into(),
+            });
+        }
+
         // build url
         let mut params = vec![
             ("encrypt", "1"),
