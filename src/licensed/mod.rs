@@ -47,18 +47,22 @@ impl LicensedState {
                 }
             }
 
-            // load from response cache
+            // load today's response cache
             if let Some((res_cache, cache_path)) = Self::get_response_cache(app, &key)? {
-                let lic_res = client.verify_response_cache(res_cache, cache_path)?;
-
-                // client.verify_response_cache() verified that res_cache.sig.date is within the allowed client.cache_lifetime.
-                // However, it's possible that the cache_lifetime (e.g. set for a month) might exceeed the license expiry date (e.g. expired in 7 days).
-                if let Some(license) = License::from_license_response(lic_res) {
-                    if !license.has_expired() {
-                        return Ok(Self {
-                            license: Some(license),
-                        });
+                // house keeping: delete yesterdays' cache
+                match Self::clear_response_cache_except(app, cache_path) {
+                    Ok(()) => {}
+                    Err(err) => {
+                        dbg!(err);
                     }
+                };
+
+                // verify and parse today's cache
+                let lic_res = client.verify_response_cache(res_cache)?;
+                if let Some(license) = License::from_license_response(lic_res) {
+                    return Ok(Self {
+                        license: Some(license),
+                    });
                 }
             }
         }
@@ -66,19 +70,8 @@ impl LicensedState {
         Ok(Self { license: None })
     }
 
-    pub(crate) fn update<R: Runtime>(
-        &mut self,
-        license: Option<License>,
-        app: &AppHandle<R>,
-    ) -> Result<()> {
-        if let Some(license) = &license {
-            // cache license key
-            Self::cache_license_key(&license.key, app)?;
-        }
-
-        // update state
+    pub(crate) fn update(&mut self, license: Option<License>) {
         self.license = license;
-        Ok(())
     }
 
     pub(crate) fn get_license(&self) -> Option<License> {
@@ -169,7 +162,7 @@ impl LicensedState {
         }
     }
 
-    fn cache_license_key<R: Runtime>(key: &String, app: &AppHandle<R>) -> Result<()> {
+    pub(crate) fn cache_license_key<R: Runtime>(key: &String, app: &AppHandle<R>) -> Result<()> {
         let path = Self::get_license_key_cache_path(app)?;
 
         let mut f = File::create(path)?;
@@ -240,11 +233,32 @@ impl LicensedState {
     }
 
     pub(crate) fn clear_response_cache<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
-        // cache dir
+        // get cache dir
         let keygen_cache_dir = Self::get_response_cache_dir(app)?;
 
         if keygen_cache_dir.exists() {
             fs::remove_dir_all(&keygen_cache_dir)?;
+        }
+
+        Ok(())
+    }
+
+    fn clear_response_cache_except<R: Runtime>(
+        app: &AppHandle<R>,
+        excluded_path: PathBuf,
+    ) -> Result<()> {
+        // get cache dir
+        let keygen_cache_dir = Self::get_response_cache_dir(app)?;
+
+        // delete all files except the excluded_path
+        if keygen_cache_dir.exists() && keygen_cache_dir.is_dir() {
+            for entry in fs::read_dir(keygen_cache_dir)? {
+                let entry = entry?;
+                let path = entry.path();
+                if path.is_file() && path != excluded_path {
+                    fs::remove_file(path)?;
+                }
+            }
         }
 
         Ok(())

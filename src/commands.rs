@@ -61,8 +61,11 @@ pub async fn validate_key<R: Runtime>(
                 LicensedState::cache_response(&app, &license.key, res_cache)?;
             }
 
-            // update app state
-            licensed_state.update(Some(license.clone()), &app)?;
+            // update state
+            licensed_state.update(Some(license.clone()));
+
+            // cache license key
+            LicensedState::cache_license_key(&license.key, &app)?;
 
             Ok(license)
         }
@@ -101,14 +104,18 @@ pub async fn checkout_machine<R: Runtime>(
     machine: State<'_, Mutex<Machine>>,
     licensed_state: State<'_, Mutex<LicensedState>>,
     client: State<'_, Mutex<KeygenClient>>,
-    ttl: u32,
+    ttl_seconds: u32,
+    ttl_forever: bool,
 ) -> Result<()> {
     let machine = machine.lock().await;
     let client = client.lock().await;
 
     let licensed_state = licensed_state.lock().await;
 
-    match machine.checkout(&licensed_state, &client, &app, ttl).await {
+    match machine
+        .checkout(&licensed_state, &client, &app, ttl_seconds, ttl_forever)
+        .await
+    {
         Ok(()) => Ok(()),
         Err(err) => {
             dbg!(&err);
@@ -126,13 +133,20 @@ pub async fn reset_license<R: Runtime>(
 ) -> Result<()> {
     let mut licensed_state = licensed_state.lock().await;
 
-    licensed_state.update(None, &app)?;
+    // reset state
+    licensed_state.update(None);
 
     if hard_reset {
-        LicensedState::clear_response_cache(&app)?;
-        LicensedState::remove_cached_license_key(&app)?;
+        // delete offline licenses
         Machine::remove_machine_file(&app)?;
+        LicensedState::clear_response_cache(&app)?;
     }
 
+    Ok(())
+}
+
+#[command]
+pub async fn reset_license_key<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> Result<()> {
+    LicensedState::remove_cached_license_key(&app)?;
     Ok(())
 }

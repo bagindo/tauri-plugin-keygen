@@ -27,6 +27,7 @@ impl License {
         self.valid && self.code == "EXPIRED"
     }
 
+    #[allow(dead_code)]
     pub(crate) fn has_expired(&self) -> bool {
         self.expiry
             .clone()

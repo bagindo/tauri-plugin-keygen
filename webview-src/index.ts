@@ -4,6 +4,10 @@ export type KeygenLicense = {
   key: string;
   code: string;
   detail: string;
+  /**
+   * License expiry can be null at the beginning (before activation)
+   * when its policy's expirationBasis is *not* set to "FROM_CREATION".
+   */
   expiry: string | null;
   valid: boolean;
   policyId: string;
@@ -45,10 +49,10 @@ export async function validateKey({
     license.code === "FINGERPRINT_SCOPE_MISMATCH";
 
   if (noMachine) {
-    await activateMachine();
+    await invoke("plugin:keygen|activate");
 
     // re-validate: update License object in Tauri App State
-    // activateMachine() response is not "parsable" to KeygenLicense type
+    // machine activation response is not "parsable" into KeygenLicense
     license = (await invoke("plugin:keygen|validate_key", {
       key,
       entitlements,
@@ -61,12 +65,14 @@ export async function validateKey({
 
 export async function validateCheckoutKey({
   key,
-  ttlSeconds,
   entitlements = [],
+  ttlSeconds = 3600,
+  ttlForever = false,
 }: {
   key: string;
-  ttlSeconds: number;
   entitlements?: string[];
+  ttlSeconds?: number;
+  ttlForever?: boolean;
 }): Promise<KeygenLicense> {
   const license = (await validateKey({
     key,
@@ -75,28 +81,21 @@ export async function validateCheckoutKey({
   })) as KeygenLicense;
 
   if (license.valid) {
-    await checkoutMachine({ ttlSeconds });
+    await invoke("plugin:keygen|checkout_machine", {
+      ttlSeconds,
+      ttlForever,
+    });
   }
 
   return license;
-}
-
-export async function activateMachine(): Promise<KeygenLicense> {
-  return (await invoke("plugin:keygen|activate")) as KeygenLicense;
-}
-
-export async function checkoutMachine({
-  ttlSeconds,
-}: {
-  ttlSeconds: number;
-}): Promise<void> {
-  await invoke("plugin:keygen|checkout_machine", {
-    ttl: ttlSeconds,
-  });
 }
 
 export async function resetLicense(hardReset: boolean = false): Promise<void> {
   return await invoke("plugin:keygen|reset_license", {
     hardReset,
   });
+}
+
+export async function resetLicenseKey(): Promise<void> {
+  return await invoke("plugin:keygen|reset_license_key");
 }

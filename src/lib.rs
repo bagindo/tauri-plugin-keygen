@@ -67,8 +67,8 @@ impl Builder {
     pub fn cache_lifetime(mut self, cache_lifetime: i64) -> Self {
         self.cache_lifetime = if cache_lifetime < 60 {
             60 // min: 1 hour
-        } else if cache_lifetime > 44_640 {
-            44_640 // max: 31 days
+        } else if cache_lifetime > 1440 {
+            1440 // max: 24 hour
         } else {
             cache_lifetime
         };
@@ -85,6 +85,7 @@ impl Builder {
                 commands::activate,
                 commands::checkout_machine,
                 commands::reset_license,
+                commands::reset_license_key,
             ])
             .setup(move |app| {
                 // get app info

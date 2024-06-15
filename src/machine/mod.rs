@@ -154,7 +154,8 @@ impl Machine {
         licensed_state: &LicensedState,
         client: &KeygenClient,
         app: &AppHandle<R>,
-        ttl: u32,
+        ttl_seconds: u32,
+        ttl_forever: bool,
     ) -> Result<()> {
         // get license
         let license = licensed_state
@@ -188,18 +189,18 @@ impl Machine {
         ];
 
         // ttl should be min 1 hour max 1 year
-        let ttl = std::cmp::min(ttl, 3600);
-        let ttl = std::cmp::max(ttl, 31556952);
+        let ttl_seconds = std::cmp::max(ttl_seconds, 3600);
+        let ttl_seconds = std::cmp::min(ttl_seconds, 31_556_952);
 
         // make sure ttl doesn't exceed license expiry
         let expiry_date = DateTime::parse_from_rfc3339(&license.expiry.clone().unwrap())
             .map_err(|_| Error::ParseErr("Failed parsing license expiry date".into()))?;
         let seconds_to_expiry = expiry_date.signed_duration_since(Utc::now()).num_seconds();
-        let ttl: i64 = std::cmp::min(seconds_to_expiry, ttl.into());
-        let ttl = ttl.to_string();
+        let ttl_seconds: i64 = std::cmp::min(seconds_to_expiry, ttl_seconds.into());
+        let ttl = ttl_seconds.to_string();
 
         // set ttl params
-        if license.should_maintain_access() {
+        if ttl_forever && license.should_maintain_access() {
             params.push(("ttl", "")); // checkout forever for perpetual fallback license
         } else {
             params.push(("ttl", &ttl))
@@ -365,7 +366,9 @@ impl Machine {
 
     pub(crate) fn remove_machine_file<R: Runtime>(app: &AppHandle<R>) -> Result<()> {
         let path = Self::get_machine_file_path(app)?;
-        fs::remove_file(path)?;
+        if path.exists() {
+            fs::remove_file(path)?;
+        }
         Ok(())
     }
 

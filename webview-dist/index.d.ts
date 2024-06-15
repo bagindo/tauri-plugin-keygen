@@ -2,6 +2,10 @@ export declare type KeygenLicense = {
     key: string;
     code: string;
     detail: string;
+    /**
+     * License expiry can be null at the beginning (before activation)
+     * when its policy's expirationBasis is *not* set to "FROM_CREATION".
+     */
     expiry: string | null;
     valid: boolean;
     policyId: string;
@@ -19,13 +23,11 @@ export declare function validateKey({ key, entitlements, cacheValidResponse, }: 
     entitlements?: string[];
     cacheValidResponse?: boolean;
 }): Promise<KeygenLicense>;
-export declare function validateCheckoutKey({ key, ttlSeconds, entitlements, }: {
+export declare function validateCheckoutKey({ key, entitlements, ttlSeconds, ttlForever, }: {
     key: string;
-    ttlSeconds: number;
     entitlements?: string[];
+    ttlSeconds?: number;
+    ttlForever?: boolean;
 }): Promise<KeygenLicense>;
-export declare function activateMachine(): Promise<KeygenLicense>;
-export declare function checkoutMachine({ ttlSeconds, }: {
-    ttlSeconds: number;
-}): Promise<void>;
 export declare function resetLicense(hardReset?: boolean): Promise<void>;
+export declare function resetLicenseKey(): Promise<void>;
