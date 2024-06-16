@@ -66,7 +66,7 @@ export async function validateKey({
 export async function validateCheckoutKey({
   key,
   entitlements = [],
-  ttlSeconds = 3600,
+  ttlSeconds = 86400,
   ttlForever = false,
 }: {
   key: string;
