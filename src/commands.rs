@@ -129,18 +129,15 @@ pub async fn reset_license<R: Runtime>(
     app: AppHandle<R>,
     _window: Window<R>,
     licensed_state: State<'_, Mutex<LicensedState>>,
-    hard_reset: bool,
 ) -> Result<()> {
     let mut licensed_state = licensed_state.lock().await;
 
     // reset state
     licensed_state.update(None);
 
-    if hard_reset {
-        // delete offline licenses
-        Machine::remove_machine_file(&app)?;
-        LicensedState::clear_response_cache(&app)?;
-    }
+    // delete offline licenses
+    Machine::remove_machine_file(&app)?;
+    LicensedState::clear_response_cache(&app)?;
 
     Ok(())
 }

@@ -90,10 +90,8 @@ export async function validateCheckoutKey({
   return license;
 }
 
-export async function resetLicense(hardReset: boolean = false): Promise<void> {
-  return await invoke("plugin:keygen|reset_license", {
-    hardReset,
-  });
+export async function resetLicense(): Promise<void> {
+  return await invoke("plugin:keygen|reset_license");
 }
 
 export async function resetLicenseKey(): Promise<void> {

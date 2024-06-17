@@ -29,5 +29,5 @@ export declare function validateCheckoutKey({ key, entitlements, ttlSeconds, ttl
     ttlSeconds?: number;
     ttlForever?: boolean;
 }): Promise<KeygenLicense>;
-export declare function resetLicense(hardReset?: boolean): Promise<void>;
+export declare function resetLicense(): Promise<void>;
 export declare function resetLicenseKey(): Promise<void>;
