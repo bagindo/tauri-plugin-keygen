@@ -12,20 +12,20 @@ Licensed state is managed in the Tauri App State (Rust back-end), and can be acc
 
 ## 📖 Table of Contents
 
-- [Table of Contents](#book-table-of-contents)
-- [Video Tutorial](#tv-video-tutorial)
-- [Install](#arrow_down-install)
-- [Setup](#electric_plug-setup)
-  - [Custom Configs](#gear-custom-configs)
-  - [with_custom_domain](#globe_with_meridians-with_custom_domain)
-- [Usage](#zap-usage)
-  - [Timed License - with trial](#stopwatch-timed-license---with-trial)
-  - [Feature Base License](#medal_military-feature-base-license)
-- [JavaScript Guest Bindings](#space_invader-javascript-guest-bindings)
-  - [getLicense](#ticket-getlicense)
-  - [getLicenseKey](#old_key-getlicensekey)
-  - [validateKey](#rocket-validatekey)
-  - [validateCheckoutKey](#rocket-computer-validatecheckoutkey)
+- [Table of Contents](#-table-of-contents)
+- [Video Tutorial](#-video-tutorial)
+- [Install](#%EF%B8%8F-install)
+- [Setup](#-setup)
+  - [Custom Configs](#%EF%B8%8F-custom-configs)
+  - [with_custom_domain](#-with_custom_domain)
+- [Usage](#-usage)
+  - [Timed License - with trial](#%EF%B8%8F-timed-license---with-trial)
+  - [Feature Base License](#%EF%B8%8F-feature-base-license)
+- [JavaScript Guest Bindings](#-javascript-guest-bindings)
+  - [getLicense](#-getlicense)
+  - [getLicenseKey](#%EF%B8%8F-getlicensekey)
+  - [validateKey](#-validatekey)
+  - [validateCheckoutKey](#--validatecheckoutkey)
   - [resetLicense](#-resetlicense)
   - [resetLicenseKey](#-resetlicensekey)
 
@@ -223,7 +223,7 @@ fn main() {
 
 In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/esp-trial-license), the app's main page is guarded by a layout route `_licensed.tsx`, that will re-direct users to the validation page if they don't have a valid license.
 
-Watch the [video tutorial](#tv-video-tutorial) for the step-by-step implementation. 
+Watch the [video tutorial](#-video-tutorial) for the step-by-step implementation. 
 
 The main code snippets:
 
@@ -360,7 +360,7 @@ function Validate() {
 
 In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/esp-feature-license), users can access the app without having a license, except when they want to add an image to an ESP item.
 
-Watch the [video tutorial](#tv-video-tutorial) for the step-by-step implementation. 
+Watch the [video tutorial](#-video-tutorial) for the step-by-step implementation. 
 
 The main code snippets:
 
@@ -610,10 +610,10 @@ function Validate() {
 
 Available JavaScript APIs:
 
-- [getLicense](#ticket-getlicense)
-- [getLicenseKey](#old_key-getlicensekey)
-- [validateKey](#rocket-validatekey)
-- [validateCheckoutKey](#rocket-computer-validatecheckoutkey)
+- [getLicense](#-getlicense)
+- [getLicenseKey](#%EF%B8%8F-getlicensekey)
+- [validateKey](#-validatekey)
+- [validateCheckoutKey](#--validatecheckoutkey)
 - [resetLicense](#-resetlicense)
 - [resetLicenseKey](#-resetlicensekey)
 
@@ -710,7 +710,7 @@ const beforeLoad = async function () => {
 ```
 
 > [!TIP]
-> Instead of re-directing to the `validate` page, you can re-validate the cached `licenseKey` in the background. Checkout the [video tutorial](#tv-video-tutorial) to see how you can do this.
+> Instead of re-directing to the `validate` page, you can re-validate the cached `licenseKey` in the background. Checkout the [video tutorial](#-video-tutorial) to see how you can do this.
 
 <br />
 
@@ -767,13 +767,13 @@ This plugin parses the user's machine `fingerprint` and includes it in both [lic
 > [!TIP]
 > You can utilize machine fingerprints to prevent users from using multiple trial licenses (instead of buying one). To do this, set the `machineUniquenessStrategy` attribute to `UNIQUE_PER_POLICY` on your trial policy.
 >
-> See the [video tutorial](#tv-video-tutorial) for more details.
+> See the [video tutorial](#-video-tutorial) for more details.
 
 #### 🔏 Verifying [Response Signature](https://keygen.sh/docs/api/signatures/?via=tauri-plugin)
 
 > A bad actor could redirect requests to a local licensing server under their control, which, by default, sends "valid" responses. This is known as a spoofing attack. 
 
-To ensure that the response received actually originates from Keygen's servers and has not been altered, this plugin checks the response's signature and verifies it using the [Verify Key](#electric_plug-setup) you provided in the plugin builder.
+To ensure that the response received actually originates from Keygen's servers and has not been altered, this plugin checks the response's signature and verifies it using the [Verify Key](#-setup) you provided in the plugin builder.
 
 > A bad actor could also "record" web traffic between Keygen and your desktop app, then "replay" valid responses. For example, they might replay responses that occurred before their trial license expired, in an attempt to use your software with an expired license. This is known as a replay attack. 
 
@@ -783,7 +783,7 @@ To prevent that, this plugin will reject any response that's older than 5 minute
 
 Once the response is verified, this plugin will update the `LicensedState` in the Tauri App State with a `License` object parsed from the response.
 
-If the `License` is valid and [`cacheValidResponse`](#rocket-validatekey) is true, the verified response will be cached for later use as an offline license.
+If the `License` is valid and [`cacheValidResponse`](#-validatekey) is true, the verified response will be cached for later use as an offline license.
 
 
 <br />
