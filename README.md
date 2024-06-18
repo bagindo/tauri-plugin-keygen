@@ -221,7 +221,7 @@ fn main() {
 
 ![Timed Licensing with trial](assets/esp-trial-license.gif)
 
-In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/tauri-app), the app's main page is guarded by a layout route `_licensed.tsx`, that will re-direct users to the validation page if they don't have a valid license.
+In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/esp-trial-license), the app's main page is guarded by a layout route `_licensed.tsx`, that will re-direct users to the validation page if they don't have a valid license.
 
 Watch the [video tutorial](#tv-video-tutorial) for the step-by-step implementation. 
 
@@ -358,7 +358,7 @@ function Validate() {
 
 ![Feature Base Licensing](assets/esp-feature-license.gif)
 
-In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/tauri-app), users can access the app without having a license, except when they want to add an image to an ESP item.
+In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/esp-feature-license), users can access the app without having a license, except when they want to add an image to an ESP item.
 
 Watch the [video tutorial](#tv-video-tutorial) for the step-by-step implementation. 
 
