@@ -5,6 +5,7 @@ authors = ["Baginda Namora"]
 description = "A Tauri Plugin for Keygen.sh Licensing"
 edition = "2021"
 rust-version = "1.60"
+license = "MIT"
 exclude = [
     "/examples",
     "/webview-dist",
