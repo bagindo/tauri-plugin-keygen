@@ -1,0 +1,44 @@
+{
+  "name": "esp-feature-license",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@fontsource/syne": "^5.0.20",
+    "@heroicons/react": "^2.1.3",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@tanstack/react-router": "^1.33.6",
+    "@tauri-apps/api": "^1",
+    "@types/react-datepicker": "^6.2.0",
+    "date-fns": "^3.6.0",
+    "jotai": "^2.8.2",
+    "nanoid": "^5.0.7",
+    "react": "^18.2.0",
+    "react-datepicker": "^6.9.0",
+    "react-dom": "^18.2.0",
+    "tauri-plugin-keygen-api": "github:bagindo/tauri-plugin-keygen#main",
+    "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store#v1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@tanstack/router-devtools": "^1.33.6",
+    "@tanstack/router-vite-plugin": "^1.32.17",
+    "@tauri-apps/cli": "^1",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.14",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.0.2",
+    "vite": "^5.0.0"
+  }
+}

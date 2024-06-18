@@ -5,7 +5,13 @@ authors = ["Baginda Namora"]
 description = "A Tauri Plugin for Keygen.sh Licensing"
 edition = "2021"
 rust-version = "1.60"
-exclude = ["/examples", "/webview-dist", "/webview-src", "node_modules"]
+exclude = [
+    "/examples",
+    "/webview-dist",
+    "/webview-src",
+    "/assets",
+    "node_modules",
+]
 
 [dependencies]
 tauri = { version = "1.5.2", features = ["os-api"] }
