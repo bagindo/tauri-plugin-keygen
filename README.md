@@ -10,6 +10,13 @@ Licensed state is managed in the Tauri App State (Rust back-end), and can be acc
 
 <br /><br />
 
+## Sponsored by
+
+![keygen-sh](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/keygen.png)
+
+<br /><br />
+
+
 ## 📖 Table of Contents
 
 - [Table of Contents](#-table-of-contents)
