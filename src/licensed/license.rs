@@ -124,7 +124,7 @@ impl License {
         // expiration flag
         let minutes_to_expiry = expiry.signed_duration_since(now).num_minutes();
 
-        let valid = minutes_since_issued > 0 && minutes_to_expiry > 0;
+        let valid = minutes_since_issued >= 0 && minutes_to_expiry > 0;
 
         Ok(!valid)
     }
