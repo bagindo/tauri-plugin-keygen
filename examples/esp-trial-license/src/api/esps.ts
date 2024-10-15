@@ -1,4 +1,4 @@
-import { Store } from "tauri-plugin-store-api"; // should use a db instead for prod app
+import { Store } from "@tauri-apps/plugin-store"; // should use a db instead for prod app
 import type { ESPItem } from "../types";
 
 const STORE_PATH = ".esp.dat";

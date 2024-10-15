@@ -80,7 +80,7 @@ impl Builder {
                 commands::reset_license,
                 commands::reset_license_key,
             ])
-            .setup(move |app| {
+            .setup(move |app, _api| {
                 // get app info
                 let app_name = app.package_info().name.clone();
                 let app_version = app.package_info().version.to_string();

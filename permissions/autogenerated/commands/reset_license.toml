@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-reset-license"
+description = "Enables the reset_license command without any pre-configured scope."
+commands.allow = ["reset_license"]
+
+[[permission]]
+identifier = "deny-reset-license"
+description = "Denies the reset_license command without any pre-configured scope."
+commands.deny = ["reset_license"]

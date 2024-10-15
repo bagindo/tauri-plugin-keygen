@@ -1,5 +1,5 @@
-import { appDataDir, extname, join } from "@tauri-apps/api/path";
-import { copyFile, createDir, exists } from "@tauri-apps/api/fs";
+import { appDataDir, BaseDirectory, extname, join } from "@tauri-apps/api/path";
+import { copyFile, mkdir, exists } from "@tauri-apps/plugin-fs";
 
 export async function saveImageToAppData({
   src,
@@ -52,7 +52,7 @@ async function getImagesDirPath() {
   // create if hasn't exist
   const imagesDirExists = await exists(imagesDirPath);
   if (!imagesDirExists) {
-    await createDir(imagesDirPath, { recursive: true });
+    await mkdir(imagesDirPath, { recursive: true, baseDir: BaseDirectory.AppLocalData });
   }
 
   return imagesDirPath;

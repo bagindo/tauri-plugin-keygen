@@ -19,8 +19,8 @@ use std::{
     path::PathBuf,
     time::Duration,
 };
-use tauri::{api::os::locale, webview_version};
-use tauri::{AppHandle, Runtime};
+
+use tauri::{webview_version, AppHandle, Manager, Runtime};
 use types::{MachineFileRes, MachineLicense};
 
 #[cfg(target_os = "linux")]
@@ -41,11 +41,7 @@ pub struct Machine {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-struct MachineFile {
-    enc: String,
-    sig: String,
-    alg: String,
-}
+struct MachineFile(String, String, String);
 
 impl Machine {
     pub(crate) fn new(app_name: String, app_version: String) -> Self {
@@ -61,7 +57,7 @@ impl Machine {
         // user agent
         let engine_name = ENGINE_NAME.to_string();
         let engine_version = webview_version().unwrap_or_default();
-        let locale = locale().unwrap_or_default();
+        let locale = tauri_plugin_os::locale().unwrap_or_default();
         let user_agent = format!(
             "{}/{} {}/{} {}/{} {}",
             app_name, app_version, os_name, os_version, engine_name, engine_version, locale
@@ -303,13 +299,13 @@ impl Machine {
             .map_err(|_| Error::ParseErr("failed deserializing machine file".into()))?;
 
         // Assert algorithm is supported.
-        if !lic.alg.eq("aes-256-gcm+ed25519") {
+        if !lic.2.eq("aes-256-gcm+ed25519") {
             return Err(Error::ParseErr("algorithm is not supported".into()));
         }
 
         // Verify the machine file's signature.
-        let msg = format!("machine/{}", lic.enc);
-        client.verify_signature(msg, lic.sig.to_string())?;
+        let msg = format!("machine/{}", lic.0);
+        client.verify_signature(msg, lic.1.to_string())?;
 
         // hash the license key and machine id to obtain decryption key
         let mut sha = Sha256::new();
@@ -321,7 +317,7 @@ impl Machine {
 
         // Parse the encrypted data.
         let data: Vec<_> = lic
-            .enc
+            .0
             .trim()
             .split('.')
             .map(|v| {
@@ -378,10 +374,9 @@ impl Machine {
 
     fn get_machine_file_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf> {
         // get app data dir
-        let data_dir = app
-            .path_resolver()
-            .app_data_dir()
-            .ok_or_else(|| Error::PathErr("Can't resolve app data dir".into()))?;
+        let Ok(data_dir) = app.path().app_data_dir() else {
+            return Err(Error::PathErr("Can't resolve app data dir".into()));
+        };
 
         // get cache dir
         let cache_dir = data_dir.join("keygen");

@@ -8,24 +8,18 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "2.0.1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [
-    "fs-copy-file",
-    "dialog-open",
-    "fs-remove-file",
-    "fs-exists",
-    "fs-create-dir",
-    "path-all",
-    "protocol-asset",
-    "fs-read-file",
-    "shell-open",
+tauri = { version = "2.0.3", features = [
 ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+tauri-plugin-store = "2"
 tauri-plugin-keygen = { path = "../../../" }
+tauri-plugin-shell = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

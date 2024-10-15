@@ -62,10 +62,72 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({
-  IndexRoute,
-  EspRoute,
-  ValidateRoute,
-})
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/esp': typeof EspRoute
+  '/validate': typeof ValidateRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/esp': typeof EspRoute
+  '/validate': typeof ValidateRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexRoute
+  '/esp': typeof EspRoute
+  '/validate': typeof ValidateRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/esp' | '/validate'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/esp' | '/validate'
+  id: '__root__' | '/' | '/esp' | '/validate'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  EspRoute: typeof EspRoute
+  ValidateRoute: typeof ValidateRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  EspRoute: EspRoute,
+  ValidateRoute: ValidateRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/esp",
+        "/validate"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/esp": {
+      "filePath": "esp.tsx"
+    },
+    "/validate": {
+      "filePath": "validate.tsx"
+    }
+  }
+}
+ROUTE_MANIFEST_END */

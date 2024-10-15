@@ -1,5 +1,5 @@
 // Tauri APIs
-import { open as openLink } from "@tauri-apps/api/shell";
+import { open as openLink } from "@tauri-apps/plugin-shell";
 // React
 import * as Dialog from "@radix-ui/react-dialog";
 import { Link, useLocation } from "@tanstack/react-router";

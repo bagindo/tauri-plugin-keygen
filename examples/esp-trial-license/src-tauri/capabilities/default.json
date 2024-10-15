@@ -1,0 +1,34 @@
+{
+  "identifier": "default",
+  "description": "enables the default permissions",
+  "local": true,
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "fs:allow-read-file",
+    "fs:allow-copy-file",
+    "fs:allow-mkdir",
+    "fs:allow-remove",
+    "fs:allow-exists",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "$RESOURCE/**",
+        "$APPDATA/**",
+        "$DOWNLOAD/**",
+        "$DESKTOP/**",
+        "$DOCUMENT/**",
+        "$HOME/**"
+      ]
+    },
+    "shell:allow-open",
+    "dialog:allow-open",
+    "shell:default",
+    "fs:default",
+    "dialog:default",
+    "store:default",
+    "keygen:default"
+  ]
+}

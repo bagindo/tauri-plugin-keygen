@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-validate-key"
+description = "Enables the validate_key command without any pre-configured scope."
+commands.allow = ["validate_key"]
+
+[[permission]]
+identifier = "deny-validate-key"
+description = "Denies the validate_key command without any pre-configured scope."
+commands.deny = ["validate_key"]
