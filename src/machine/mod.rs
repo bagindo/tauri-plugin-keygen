@@ -41,7 +41,11 @@ pub struct Machine {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-struct MachineFile(String, String, String);
+struct MachineFile {
+    enc: String,
+    sig: String,
+    alg: String,
+}
 
 impl Machine {
     pub(crate) fn new(app_name: String, app_version: String) -> Self {
@@ -299,13 +303,13 @@ impl Machine {
             .map_err(|_| Error::ParseErr("failed deserializing machine file".into()))?;
 
         // Assert algorithm is supported.
-        if !lic.2.eq("aes-256-gcm+ed25519") {
+        if !lic.alg.eq("aes-256-gcm+ed25519") {
             return Err(Error::ParseErr("algorithm is not supported".into()));
         }
 
         // Verify the machine file's signature.
-        let msg = format!("machine/{}", lic.0);
-        client.verify_signature(msg, lic.1.to_string())?;
+        let msg = format!("machine/{}", lic.enc);
+        client.verify_signature(msg, lic.sig.to_string())?;
 
         // hash the license key and machine id to obtain decryption key
         let mut sha = Sha256::new();
@@ -317,7 +321,7 @@ impl Machine {
 
         // Parse the encrypted data.
         let data: Vec<_> = lic
-            .0
+            .enc
             .trim()
             .split('.')
             .map(|v| {
