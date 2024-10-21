@@ -31,6 +31,7 @@
   "devDependencies": {
     "@tanstack/router-devtools": "^1.33.6",
     "@tanstack/router-vite-plugin": "^1.32.17",
+    "@tauri-apps/cli": "^2.0.3",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.2.1",
