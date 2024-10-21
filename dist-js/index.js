@@ -1,51 +1,134 @@
 import { invoke } from '@tauri-apps/api/core';
 
+function isErrorWithMessage(error) {
+    return (typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof error.message === "string");
+}
+function toErrorWithMessage(maybeError) {
+    if (isErrorWithMessage(maybeError))
+        return maybeError;
+    try {
+        return new Error(JSON.stringify(maybeError));
+    }
+    catch {
+        // fallback in case there's an error stringifying the maybeError
+        // like with circular references for example.
+        return new Error(String(maybeError));
+    }
+}
+function getErrorMessage(error) {
+    return toErrorWithMessage(error).message;
+}
+function isKeygenError(error) {
+    return (typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        "detail" in error &&
+        typeof error.code === "string" &&
+        typeof error.detail === "string");
+}
+class KeygenError extends Error {
+    constructor({ code, detail }) {
+        super(`Keygen Error: ${code}: ${detail}`);
+        // This line is needed to restore the correct prototype chain.
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = "KeygenError";
+        this.code = code;
+        this.detail = detail;
+    }
+}
+
+function throwError(e) {
+    if (isKeygenError(e)) {
+        throw new KeygenError({ code: e.code, detail: e.detail });
+    }
+    else {
+        throw new KeygenError({ code: "unknown", detail: getErrorMessage(e) });
+    }
+}
 async function getLicense() {
-    return (await invoke("plugin:keygen|get_license"));
+    try {
+        return (await invoke("plugin:keygen|get_license"));
+    }
+    catch (e) {
+        throwError(e);
+    }
 }
 async function getLicenseKey() {
-    return (await invoke("plugin:keygen|get_license_key"));
+    try {
+        return (await invoke("plugin:keygen|get_license_key"));
+    }
+    catch (e) {
+        throwError(e);
+    }
 }
 async function validateKey({ key, entitlements = [], cacheValidResponse = true, }) {
-    let license = (await invoke("plugin:keygen|validate_key", {
-        key,
-        entitlements,
-        cacheValidResponse,
-    }));
-    const noMachine = license.code === "NO_MACHINE" ||
-        license.code === "NO_MACHINES" ||
-        license.code === "FINGERPRINT_SCOPE_MISMATCH";
-    if (noMachine) {
-        await invoke("plugin:keygen|activate");
-        // re-validate: update License object in Tauri App State
-        // machine activation response is not "parsable" into KeygenLicense
-        license = (await invoke("plugin:keygen|validate_key", {
+    try {
+        let license = (await invoke("plugin:keygen|validate_key", {
             key,
             entitlements,
             cacheValidResponse,
         }));
+        const noMachine = license.code === "NO_MACHINE" ||
+            license.code === "NO_MACHINES" ||
+            license.code === "FINGERPRINT_SCOPE_MISMATCH";
+        if (noMachine) {
+            await invoke("plugin:keygen|activate");
+            // re-validate: update License object in Tauri App State
+            // machine activation response is not "parsable" into KeygenLicense
+            license = (await invoke("plugin:keygen|validate_key", {
+                key,
+                entitlements,
+                cacheValidResponse,
+            }));
+        }
+        return license;
     }
-    return license;
+    catch (e) {
+        throwError(e);
+    }
 }
 async function validateCheckoutKey({ key, entitlements = [], ttlSeconds = 86400, ttlForever = false, }) {
-    const license = (await validateKey({
-        key,
-        entitlements,
-        cacheValidResponse: false,
-    }));
-    if (license.valid) {
-        await invoke("plugin:keygen|checkout_machine", {
-            ttlSeconds,
-            ttlForever,
-        });
+    try {
+        const license = (await validateKey({
+            key,
+            entitlements,
+            cacheValidResponse: false,
+        }));
+        if (license.valid) {
+            await invoke("plugin:keygen|checkout_machine", {
+                ttlSeconds,
+                ttlForever,
+            });
+        }
+        return license;
     }
-    return license;
+    catch (e) {
+        throwError(e);
+    }
 }
 async function resetLicense() {
-    return await invoke("plugin:keygen|reset_license");
+    try {
+        return await invoke("plugin:keygen|reset_license");
+    }
+    catch (e) {
+        if (isKeygenError(e)) {
+            throw new KeygenError({ code: e.code, detail: e.detail });
+        }
+        else {
+            throw new KeygenError({ code: "unknown", detail: getErrorMessage(e) });
+        }
+    }
 }
 async function resetLicenseKey() {
-    return await invoke("plugin:keygen|reset_license_key");
+    try {
+        return await invoke("plugin:keygen|reset_license_key");
+    }
+    catch (e) {
+        throwError(e);
+    }
 }
 
-export { getLicense, getLicenseKey, resetLicense, resetLicenseKey, validateCheckoutKey, validateKey };
+export { KeygenError, getLicense, getLicenseKey, resetLicense, resetLicenseKey, validateCheckoutKey, validateKey };

@@ -36,5 +36,9 @@ export const getLicenseErrMessage = ({
     return `Your ${getPolicyName(policyId).toUpperCase()} license hasn't been activated`;
   }
 
+  if (code === "unknown") {
+    return `Unknown error: ${detail}`;
+  }
+
   return `Invalid license: ${detail}`;
 };

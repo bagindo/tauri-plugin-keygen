@@ -12,10 +12,7 @@ export declare type KeygenLicense = {
     entitlements: string[];
     metadata: Record<string, any>;
 };
-export declare type KeygenError = {
-    code: string;
-    detail: string;
-};
+export { KeygenError } from "./error";
 export declare function getLicense(): Promise<KeygenLicense | null>;
 export declare function getLicenseKey(): Promise<string | null>;
 export declare function validateKey({ key, entitlements, cacheValidResponse, }: {

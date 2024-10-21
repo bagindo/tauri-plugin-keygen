@@ -1,6 +1,6 @@
 import {
-  type KeygenError,
   type KeygenLicense,
+  KeygenError,
   validateCheckoutKey,
   getLicenseKey,
 } from "tauri-plugin-keygen-api";
@@ -53,8 +53,14 @@ function Validate() {
         ttlSeconds: 604800 /* 1 week*/,
       });
     } catch (e) {
-      const { code, detail } = e as KeygenError;
-      setErr(getLicenseErrMessage({ code, detail }));
+      if (e instanceof KeygenError) {
+        const { code, detail } = e;
+        setErr(getLicenseErrMessage({ code, detail }));
+      } else {
+        setErr("Unknown error occured");
+        console.error(e);
+      }
+
       setLoading(false);
       return;
     }

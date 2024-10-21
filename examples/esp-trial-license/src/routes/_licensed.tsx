@@ -57,13 +57,16 @@ export const Route = createFileRoute("/_licensed")({
   },
   component: Licensed,
   errorComponent: ({ error }) => {
-    const { code, detail } = error as unknown as KeygenError;
-    return (
-      <Navigate
-        to="/validate"
-        search={{ err: getLicenseErrMessage({ code, detail }) }}
-      />
-    );
+    let err: string;
+
+    if (error instanceof KeygenError) {
+      const { code, detail } = error;
+      err = getLicenseErrMessage({ code, detail });
+    } else {
+      err = error.message;
+    }
+
+    return <Navigate to="/validate" search={{ err }} />;
   },
 });
 
