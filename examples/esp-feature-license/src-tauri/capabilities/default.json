@@ -3,7 +3,9 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "local": true,
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "dialog:default",
