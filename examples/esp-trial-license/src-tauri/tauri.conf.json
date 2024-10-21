@@ -1,42 +1,28 @@
 {
   "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist"
+    "beforeDevCommand": "pnpm run dev",
+    "beforeBuildCommand": "pnpm run build",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "esp-trial-license",
-    "version": "0.0.0"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "dialog": {
-        "open": true
-      },
-      "path": {
-        "all": true 
-      },
-      "fs": {
-        "all": false,
-        "readFile": true,
-        "copyFile": true,
-        "createDir": true,
-        "removeFile": true,
-        "exists": true,
-        "scope": ["$RESOURCE/**", "$APPDATA/**", "$DOWNLOAD/**", "$DESKTOP/**", "$DOCUMENT/**", "$PUBLIC/**", "$HOME/**", "$PICTURE/**", "$VIDEO/**"]
-      },
-      "protocol": {
-        "all": false,
-        "asset": true, 
-        "assetScope": ["$RESOURCE/**", "$APPDATA/**", "$DOWNLOAD/**", "$DESKTOP/**", "$DOCUMENT/**", "$PUBLIC/**", "$HOME/**", "$PICTURE/**", "$VIDEO/**"]
-      },
-      "shell": {
-        "all": false,
-        "open": true
-      }
-    },
+  "productName": "esp-trial-license",
+  "mainBinaryName": "esp-trial-license",
+  "version": "0.0.0",
+  "identifier": "example.esp.trial",
+  "plugins": {},
+  "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Daily ESP",
@@ -46,18 +32,6 @@
     ],
     "security": {
       "csp": null
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "example.esp.trial",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
     }
-  }
+  } 
 }

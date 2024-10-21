@@ -6,5 +6,7 @@
 debug.log
 .vscode/settings.json
 
-/target
 node_modules/
+
+# rust compiled folders
+target/

@@ -1,7 +1,7 @@
 // Tauri
-import { open as openFileDialog } from "@tauri-apps/api/dialog";
-import { convertFileSrc } from "@tauri-apps/api/tauri";
-import { removeFile } from "@tauri-apps/api/fs";
+import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { remove } from "@tauri-apps/plugin-fs";
 
 // React
 import { forwardRef, useEffect, useState } from "react";
@@ -289,7 +289,7 @@ function ESPItemInput({
             <button
               className="absolute right-2 top-2 z-10 hidden size-5 items-center justify-center rounded-full bg-amber-600 text-white transition-colors hover:bg-amber-500 active:bg-amber-600 group-hover:flex"
               onClick={() => {
-                removeFile(item.image).then(() => {
+                remove(item.image).then(() => {
                   onItemUpdated({ ...item, image: "" });
                 });
               }}

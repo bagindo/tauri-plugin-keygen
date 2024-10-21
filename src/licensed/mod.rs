@@ -18,7 +18,7 @@ use std::{
     path::PathBuf,
     time::Duration,
 };
-use tauri::{AppHandle, Runtime};
+use tauri::{AppHandle, Manager, Runtime};
 use types::*;
 
 #[derive(Debug, Serialize, Default, Clone)]
@@ -196,11 +196,9 @@ impl LicensedState {
 
     fn get_license_key_cache_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf> {
         // get app data dir
-        let data_dir = app
-            .path_resolver()
-            .app_data_dir()
-            .ok_or_else(|| Error::PathErr("Can't resolve app data dir".into()))?;
-
+        let Ok(data_dir) = app.path().app_data_dir() else {
+            return Err(Error::PathErr("Can't resolve app data dir".into()));
+        };
         // get cache dir
         let keygen_cache_dir = data_dir.join("keygen");
 
@@ -310,10 +308,9 @@ impl LicensedState {
 
     fn get_response_cache_dir<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf> {
         // get app data dir
-        let data_dir = app
-            .path_resolver()
-            .app_data_dir()
-            .ok_or_else(|| Error::PathErr("Can't resolve app data dir".into()))?;
+        let Ok(data_dir) = app.path().app_data_dir() else {
+            return Err(Error::PathErr("Can't resolve app data dir".into()));
+        };
 
         // get cache dir
         let keygen_cache_dir = data_dir.join("keygen/validation_cache");

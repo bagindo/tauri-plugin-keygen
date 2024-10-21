@@ -75,10 +75,94 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({
-  IndexRoute,
-  LicensedRoute: LicensedRoute.addChildren({ LicensedEspRoute }),
-  ValidateRoute,
-})
+interface LicensedRouteChildren {
+  LicensedEspRoute: typeof LicensedEspRoute
+}
+
+const LicensedRouteChildren: LicensedRouteChildren = {
+  LicensedEspRoute: LicensedEspRoute,
+}
+
+const LicensedRouteWithChildren = LicensedRoute._addFileChildren(
+  LicensedRouteChildren,
+)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '': typeof LicensedRouteWithChildren
+  '/validate': typeof ValidateRoute
+  '/esp': typeof LicensedEspRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '': typeof LicensedRouteWithChildren
+  '/validate': typeof ValidateRoute
+  '/esp': typeof LicensedEspRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexRoute
+  '/_licensed': typeof LicensedRouteWithChildren
+  '/validate': typeof ValidateRoute
+  '/_licensed/esp': typeof LicensedEspRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '' | '/validate' | '/esp'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '' | '/validate' | '/esp'
+  id: '__root__' | '/' | '/_licensed' | '/validate' | '/_licensed/esp'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  LicensedRoute: typeof LicensedRouteWithChildren
+  ValidateRoute: typeof ValidateRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  LicensedRoute: LicensedRouteWithChildren,
+  ValidateRoute: ValidateRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/_licensed",
+        "/validate"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/_licensed": {
+      "filePath": "_licensed.tsx",
+      "children": [
+        "/_licensed/esp"
+      ]
+    },
+    "/validate": {
+      "filePath": "validate.tsx"
+    },
+    "/_licensed/esp": {
+      "filePath": "_licensed.esp.tsx",
+      "parent": "/_licensed"
+    }
+  }
+}
+ROUTE_MANIFEST_END */

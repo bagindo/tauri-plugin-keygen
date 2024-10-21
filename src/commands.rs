@@ -16,7 +16,6 @@ pub async fn get_license<R: Runtime>(
     licensed_state: State<'_, Mutex<LicensedState>>,
 ) -> Result<Option<License>> {
     let licensed_state = licensed_state.lock().await;
-
     Ok(licensed_state.get_license())
 }
 

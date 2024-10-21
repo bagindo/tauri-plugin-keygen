@@ -1,17 +1,17 @@
-import { Store } from "tauri-plugin-store-api"; // should use a db instead for prod app
+import { Store } from "@tauri-apps/plugin-store"; // should use a db instead for prod app
 import type { ESPItem } from "../types";
 
-const STORE_PATH = ".esp.dat";
+const STORE_PATH = ".esp.bin";
 
 export async function getESPItems({ date }: { date: string }) {
   try {
     // load store
-    const espStore = new Store(STORE_PATH);
+    const espStore = await Store.load(STORE_PATH);
 
     // get esp items for "YYYY-MM-DD"
     const dateItems = await espStore.get<ESPItem[]>(date);
 
-    return dateItems === null ? [] : dateItems;
+    return dateItems === undefined ? [] : dateItems;
   } catch (e) {
     console.error(e);
     return [];
@@ -27,13 +27,13 @@ export async function upsertESPItem({
 }) {
   try {
     // load store
-    const espStore = new Store(STORE_PATH);
+    const espStore = await Store.load(STORE_PATH);
 
     // get esp items for "YYYY-MM-DD"
     const dateItems = await espStore.get<ESPItem[]>(date);
 
     // no items yet for "YYYY-MM-DD"
-    if (dateItems === null) {
+    if (dateItems === undefined) {
       await espStore.set(date, [espItem]); // INSERT
       await espStore.save();
     }
@@ -69,12 +69,12 @@ export async function deleteESPItem({
   date: string;
 }) {
   try {
-    const espStore = new Store(STORE_PATH);
+    const espStore = await Store.load(STORE_PATH);
 
     // get esp items for "YYYY-MM-DD"
     const dateItems = await espStore.get<ESPItem[]>(date);
 
-    if (dateItems !== null) {
+    if (dateItems !== undefined) {
       // get old item
       const oldItem = dateItems.find((item) => item.id === id);
 

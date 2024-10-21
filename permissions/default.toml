@@ -1,0 +1,11 @@
+[default]
+description = "Default permissions for the plugin"
+permissions = [
+    "allow-activate",
+    "allow-checkout-machine",
+    "allow-get-license",
+    "allow-get-license-key",
+    "allow-reset-license",
+    "allow-reset-license-key",
+    "allow-validate-key",
+]
