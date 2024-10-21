@@ -155,7 +155,7 @@ fn main() {
         Keygen
         <a href="https://keygen.sh/docs/api/versioning/?via=tauri-plugin#pinning" target="_blank">pinned</a> the API version you're using to your account.
         <p>
-        <img src="https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/settings_api_v.webp"/>
+        <img src="assets/settings_api_v.webp"/>
         </p>
         </p>
         <p>This config is useful to test that everything still works, before you change your account's API version (e.g. from 1.3 to 1.7) on the Keygen Dashboard.</p>

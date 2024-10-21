@@ -10,6 +10,3 @@ node_modules/
 
 # rust compiled folders
 target/
-
-# compiled plugins
-dist-js/
