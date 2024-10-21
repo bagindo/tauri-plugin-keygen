@@ -1,10 +1,10 @@
-![tauri-plugin-keygen](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/banner.webp)
+![tauri-plugin-keygen](assets/banner.webp)
 
 # Tauri Plugin keygen
 
 This plugin helps you implement timed licensing (with trial) and feature-base licensing for your Tauri desktop app using the [Keygen Licensing API](https://keygen.sh/docs/api/?via=tauri-plugin).
 
-It handles license validation requests, verifies response signatures, caches valid responses, and manages the machine file for offline licensing. 
+It handles license validation requests, verifies response signatures, caches valid responses, and manages the machine file for offline licensing.
 
 Licensed state is managed in the Tauri App State (Rust back-end), and can be accessed via JavaSript Guest bindings in the front-end.
 
@@ -12,11 +12,9 @@ Licensed state is managed in the Tauri App State (Rust back-end), and can be acc
 
 ## Sponsored by
 
-<a href="https://keygen.sh/?via=tauri-plugin"><img src="https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/keygen.png" alt="keygen-sh" style="height:75px;"/></a>
-
+<a href="https://keygen.sh/?via=tauri-plugin"><img src="assets/keygen.png" alt="keygen-sh" style="height:75px;"/></a>
 
 <br /><br />
-
 
 ## 📖 Table of Contents
 
@@ -41,21 +39,17 @@ Licensed state is managed in the Tauri App State (Rust back-end), and can be acc
 
 ## 📺 Video Tutorial
 
-![How to License Your React/Tauri Desktop App](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/tutorial_thumb.webp)
+![How to License Your React/Tauri Desktop App](assets/tutorial_thumb.webp)
 
 <br /><br />
 
 ## ⬇️ Install
 
-> This plugin is made for Tauri v1. But, it'll be updated on Tauri v2 stable release.
-
-<br />
-
 🦀 Add the following line to `src-tauri/cargo.toml` to install the core plugin:
 
 ```toml
 [dependencies]
-tauri-plugin-keygen = { git = "https://github.com/bagindo/tauri-plugin-keygen", branch = "main" }
+tauri-plugin-keygen = { git = "https://github.com/bagindo/tauri-plugin-keygen", branch = "v2" }
 ```
 
 <br />
@@ -63,7 +57,7 @@ tauri-plugin-keygen = { git = "https://github.com/bagindo/tauri-plugin-keygen", 
 👾 Install the JavaScript Guest bindings:
 
 ```sh
-npm add https://github.com/bagindo/tauri-plugin-keygen#main
+npm add https://github.com/bagindo/tauri-plugin-keygen#v2
 ```
 
 <br /><br />
@@ -72,7 +66,7 @@ npm add https://github.com/bagindo/tauri-plugin-keygen#main
 
 First, [sign-up for a free account](https://keygen.sh/?=tauri-plugin) and get your Keygen Account ID and Keygen Verify Key.
 
-![Keygen Account Settings](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/settings.webp)
+![Keygen Account Settings](assets/settings.webp)
 
 <br />
 
@@ -218,6 +212,7 @@ fn main() {
 }
 
 ```
+
 > [!NOTE]
 > Chaining the `api_url` config won't matter here.
 
@@ -227,11 +222,11 @@ fn main() {
 
 ### ⏱️ Timed License - with trial
 
-![Timed Licensing with trial](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/esp-trial-license.gif)
+![Timed Licensing with trial](assets/esp-trial-license.gif)
 
 In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/esp-trial-license), the app's main page is guarded by a layout route `_licensed.tsx`, that will re-direct users to the validation page if they don't have a valid license.
 
-Watch the [video tutorial](#-video-tutorial) for the step-by-step implementation. 
+Watch the [video tutorial](#-video-tutorial) for the step-by-step implementation.
 
 The main code snippets:
 
@@ -364,11 +359,11 @@ function Validate() {
 
 ### 🎖️ Feature Base License
 
-![Feature Base Licensing](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/esp-feature-license.gif)
+![Feature Base Licensing](assets/esp-feature-license.gif)
 
 In this [example](https://github.com/bagindo/tauri-plugin-keygen/tree/main/examples/esp-feature-license), users can access the app without having a license, except when they want to add an image to an ESP item.
 
-Watch the [video tutorial](#-video-tutorial) for the step-by-step implementation. 
+Watch the [video tutorial](#-video-tutorial) for the step-by-step implementation.
 
 The main code snippets:
 
@@ -629,7 +624,7 @@ Available JavaScript APIs:
 
 ### 🎫 `getLicense()`
 
-Get the current license from the `LicensedState` in the Tauri App State. 
+Get the current license from the `LicensedState` in the Tauri App State.
 
 Returns `KeygenLicense` or `null`.
 
@@ -655,7 +650,7 @@ const beforeLoad = async function () => {
 }
 ```
 
-![getLicense() diagram](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/get_license.webp)
+![getLicense() diagram](assets/get_license.webp)
 
 How does this plugin manages `LicensedState`?
 
@@ -681,11 +676,9 @@ the `LicensedState` in the Tauri App State will be set to `None` (serialized to 
 
 #### 🔄 State Update
 
-You can't update the `LicensedState` directly. 
+You can't update the `LicensedState` directly.
 
 Aside than initiating the state from the offline licenses on app loads, this plugin will update the licensed state with the verified response from `validateKey()` or `validateCheckoutKey()`, and reset it back to `None` when you call `resetLicense()`.
-
-
 
 <br />
 
@@ -695,7 +688,7 @@ Get the cached license key.
 
 Returns `string` or `null`.
 
-![getLicenseKey() diagram](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/get_license_key.webp)
+![getLicenseKey() diagram](assets/get_license_key.webp)
 
 The license key is cached separately from the offline licenses, so that when the offline licenses expired and `getLicense()` returns `null`, you can re-validate without asking the user to re-enter their key.
 
@@ -726,11 +719,11 @@ const beforeLoad = async function () => {
 
 Send [license validation](https://keygen.sh/docs/api/licenses/?via=tauri-plugin#licenses-actions-validate-key) and [machine activation](https://keygen.sh/docs/api/machines/?via=tauri-plugin#machines-create) requests.
 
-| Params               | Type       | Required | Default | Description                                   |
-| -------------------- | ---------- | -------- | ------- | --------------------------------------------- |
-| key                  | `string`   | ✅       | -       | The license key to be validated               |
-| entitlements         | `string[]` |          | `[]`    | The list of entitlement code to be validated  |
-| cacheValidResponse   | `boolean`  |          | `true`  | Whether or not to cache valid response         |
+| Params             | Type       | Required | Default | Description                                  |
+| ------------------ | ---------- | -------- | ------- | -------------------------------------------- |
+| key                | `string`   | ✅       | -       | The license key to be validated              |
+| entitlements       | `string[]` |          | `[]`    | The list of entitlement code to be validated |
+| cacheValidResponse | `boolean`  |          | `true`  | Whether or not to cache valid response       |
 
 Returns `KeygenLicense`. Throws `KeygenError`.
 
@@ -764,7 +757,7 @@ const validate = async (key: string, entitlements: string[] = []) => {
 };
 ```
 
-![validateKey() diagram](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/validate_key.webp)
+![validateKey() diagram](assets/validate_key.webp)
 
 What happens under the hood when you call `validateKey()`?
 
@@ -779,11 +772,11 @@ This plugin parses the user's machine `fingerprint` and includes it in both [lic
 
 #### 🔏 Verifying [Response Signature](https://keygen.sh/docs/api/signatures/?via=tauri-plugin)
 
-> A bad actor could redirect requests to a local licensing server under their control, which, by default, sends "valid" responses. This is known as a spoofing attack. 
+> A bad actor could redirect requests to a local licensing server under their control, which, by default, sends "valid" responses. This is known as a spoofing attack.
 
 To ensure that the response received actually originates from Keygen's servers and has not been altered, this plugin checks the response's signature and verifies it using the [Verify Key](#-setup) you provided in the plugin builder.
 
-> A bad actor could also "record" web traffic between Keygen and your desktop app, then "replay" valid responses. For example, they might replay responses that occurred before their trial license expired, in an attempt to use your software with an expired license. This is known as a replay attack. 
+> A bad actor could also "record" web traffic between Keygen and your desktop app, then "replay" valid responses. For example, they might replay responses that occurred before their trial license expired, in an attempt to use your software with an expired license. This is known as a replay attack.
 
 To prevent that, this plugin will reject any response that's older than 5 minutes, even if the signature is valid.
 
@@ -792,7 +785,6 @@ To prevent that, this plugin will reject any response that's older than 5 minute
 Once the response is verified, this plugin will update the `LicensedState` in the Tauri App State with a `License` object parsed from the response.
 
 If the `License` is valid and [`cacheValidResponse`](#-validatekey) is true, the verified response will be cached for later use as an offline license.
-
 
 <br />
 
@@ -855,7 +847,6 @@ Call `validateKey()`, then [download](https://keygen.sh/docs/api/machines/?via=t
     </tbody>
 </table>
 
-
 Returns `KeygenLicense`. Throws `KeygenError`.
 
 ```javascript
@@ -889,7 +880,7 @@ const validate = async (key: string, entitlements: string[] = []) => {
 };
 ```
 
-![validateCheckoutKey() diagram](https://github.com/bagindo/tauri-plugin-keygen/blob/main/assets/validate_checkout_key.webp)
+![validateCheckoutKey() diagram](assets/validate_checkout_key.webp)
 
 As with `validateKey()`, it will also parse the machine fingerprint, verify the response signature, and update the Tauri App State.
 
